@@ -12,7 +12,8 @@
  conda install -c anaconda cudnn
  pip install tensorflow[and-cuda]
 
-#notebook
-
+#packages
+ conda install pillow
+ 
 
 ```
