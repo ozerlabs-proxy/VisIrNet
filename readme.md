@@ -13,8 +13,6 @@
  pip install tensorflow[and-cuda]
 
 #notebook
-pip install notebook
-
 
 
 ```
