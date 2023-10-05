@@ -14,6 +14,14 @@
 
 #packages
  conda install pillow
- 
+
+# model visualization
+ conda install graphviz
+ conda install python-graphviz
+ conda install pydot
+
+ conda install -c conda-forge tqdm
+#  pip install tf-geometric
+ pip install tensorflow_graphics
 
 ```

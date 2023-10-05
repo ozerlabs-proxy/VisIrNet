@@ -6,14 +6,11 @@ import tensorflow as tf
 import json
 from pathlib import Path
 
-
-
-
 class Dataset():
     def __init__(self, dataset, split = "train"):
         
         self.set_paths(dataset = dataset, split=split)
-        print(f"[INFO] loading{split} dataset")
+        print(f"[INFO] loading {split} dataset")
         self.dataset = tf.data.Dataset.list_files(str(self.INPUTS_DIR / "*.*"))
         print(f"[INFO] {split} _dataset: ", len(self.dataset))
         self.dataset = self.dataset.map(lambda x: tf.py_function(self._preprocess_instance, 
@@ -120,4 +117,3 @@ class Dataset():
         _instance = tf.strings.as_string(str(_instance))
         
         return input_image, template_image, label ,_instance
-        # return None, None, None ,_instance
