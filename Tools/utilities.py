@@ -1,6 +1,16 @@
 import json
 import numpy as np
 from pathlib import Path
+import tensorflow as tf
+
+def tensor_has_nan(some_tensor):
+        """
+        check if the tensor has nans
+        """
+
+        
+        return tf.math.is_nan(some_tensor).numpy().any()
+
 
 # dumping json needs to convert numpy types to python types
 def np_encoder(object):

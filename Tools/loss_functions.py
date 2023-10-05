@@ -1,42 +1,43 @@
 import tensorflow as tf
-from Tools.backboneUtils import _similarity_loss
-from  Tools.warper import Warper
+import Tools.backboneUtils as BackBoneUtils
+import Tools.utilities as common_utils
 
 
-def get_backbone_loss_ssim(rgb_images,
-                                ir_images,
-                                rgb_fmaps,
-                                ir_fmaps,
-                                gt_matrix):
-    
+def compute_similarity_differences_mse(img_1, img_2):
+        
     """
         Compute different loss for backbone
     """
+    # print(f":[DEBUGGING")
+    # # print types and shapes
+    # print(f":[DEBUGGING] img_1 type {type(img_1)}")
+    # print(f":[DEBUGGING] img_2 type {type(img_2)}")
+    # print(f":[DEBUGGING] img_1 shape {img_1.shape}")
+    # print(f":[DEBUGGING] img_2 shape {img_2.shape}")
     
-    batch_size=rgb_images.shape[0]
     
-    _warper = Warper(batch_size=batch_size,
-                                    height_template=ir_fmaps.shape[1],
-                                    width_template=ir_fmaps.shape[2]
-                                    )
-    frgb_warped_to_fir=_warper.projective_inverse_warp(rgb_fmaps, gt_matrix)
-    Irgb_warped_to_Iir=_warper.projective_inverse_warp(rgb_images, gt_matrix)
-
-    ssim_fir_frgb=tf.reduce_mean(_similarity_loss(ir_fmaps,frgb_warped_to_fir))#should be minimal
-    ssim_fir_Iir=tf.reduce_mean(_similarity_loss(ir_fmaps,ir_images))#
-    ssim_frgb_Irgb=tf.reduce_mean(_similarity_loss(frgb_warped_to_fir,Irgb_warped_to_Iir))#should be minimal
-    ssim_fir_Irgb=tf.reduce_mean(_similarity_loss(ir_fmaps,Irgb_warped_to_Iir))#should be minimal
-    ssim_frgb_Iir=tf.reduce_mean(_similarity_loss(frgb_warped_to_fir,ir_images))#
-    ssim_Iir_Irgb=tf.reduce_mean(_similarity_loss(ir_images,Irgb_warped_to_Iir))#
+    fmaps_have_nans = common_utils.tensor_has_nan(img_2) or common_utils.tensor_has_nan(img_1) 
+    assert (len(img_1.shape)==4 and len(img_2.shape)==4 ), "[ERROR] images must have 4 dimensions"
+    assert not common_utils.tensor_has_nan(img_1) , "[ERROR] images must not have nans"
+    assert not common_utils.tensor_has_nan(img_2) , "[ERROR] images must not have nans"
     
-    # losses = {  "ssim_fir_frgb":ssim_fir_frgb,
-    #             "ssim_fir_Iir":ssim_fir_Iir,
-    #             "ssim_frgb_Irgb":ssim_frgb_Irgb,
-    #             "ssim_fir_Irgb":ssim_fir_Irgb,
-    #             "ssim_frgb_Iir":ssim_frgb_Iir,
-    #             "ssim_Iir_Irgb":ssim_Iir_Irgb
-    #             }
-    return ssim_fir_frgb,ssim_fir_Iir,ssim_frgb_Irgb,ssim_fir_Irgb,ssim_frgb_Iir,ssim_Iir_Irgb
+    
+    
+    
+    img_1 = BackBoneUtils.get_fmaps_in_suitable_shape(img_1)
+    img_2 = BackBoneUtils.get_fmaps_in_suitable_shape(img_2)
+    
+    img_1 = BackBoneUtils.get_fused_fmaps(img_1)
+    img_2 = BackBoneUtils.get_fused_fmaps(img_2)
+    
+    assert img_1.shape == img_2.shape, "[ERROR] images must have the same shape"
+    before_loss_nans = common_utils.tensor_has_nan(img_2) or common_utils.tensor_has_nan(img_1)
+    assert not before_loss_nans , "[ERROR] loss cant be computed on  nans"
+    
+    # we can now compute loss 
+    return tf.math.reduce_mean(tf.math.square(img_1-img_2))
+    
+    
 
 def combine_ssim_losses(ssim_fir_frgb,
                         ssim_fir_Iir,
@@ -49,4 +50,3 @@ def combine_ssim_losses(ssim_fir_frgb,
     total_loss= ssim_frgb_Irgb + 0.5*(ssim_fir_frgb  + ssim_fir_Irgb) + margin_ir
     return total_loss
     
-

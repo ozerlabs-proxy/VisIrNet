@@ -10,6 +10,27 @@ import cv2
 from Tools.warper import Warper
 
 
+
+def _get_warped_sampled(images, homography_matrices, source_shape=(128,128)):
+    """
+        check if the transformed images have nans
+    """
+    if len(images.shape) == 3:
+        images = np.expand_dims(images, axis=0)
+    height_template, width_template = source_shape
+    
+    batch_size = images.shape[0]
+    
+    _warper = Warper(batch_size,height_template=height_template,width_template=width_template)
+    warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
+    warped_sampled = tf.cast(warped_sampled, tf.float32)
+    
+    _transformed_images_have_nans = tf.math.is_nan(warped_sampled).numpy().any()  
+    
+    return warped_sampled, _transformed_images_have_nans  
+
+
+
 def _transformed_images(images, homography_matrices):
     """
         check if the transformed images have nans
@@ -52,9 +73,7 @@ def get_ground_truth_homographies(u_v_list):
         homography matrices from u_v_list
     """
 
-    batch_size=u_v_list.shape[0]
-    
-    
+    batch_size = u_v_list.shape[0]
     u_list = u_v_list[:, :4]
     v_list = u_v_list[:, 4:]
     _initial_motion_matrix = get_initial_motion_matrix()
@@ -80,7 +99,11 @@ def get_ground_truth_homographies(u_v_list):
         
     homography_matrices = np.asarray(matrix_list).astype(np.float32)
     homography_matrices = tf.matmul(homography_matrices,_initial_motion_matrix) 
-    homography_matrices = homography_matrices / homography_matrices[...,2,2]   
+    dividend = homography_matrices[...,2,2]
+    dividend = tf.expand_dims(dividend, axis=-1)
+    dividend = tf.expand_dims(dividend, axis=-1)
+    homography_matrices = tf.divide(homography_matrices,dividend)
+    assert not tf.math.is_nan(homography_matrices).numpy().any(), "homography matrices have nan values"
     return homography_matrices
 
 def get_inverse_homographies(homography_matrices):
