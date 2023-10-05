@@ -41,3 +41,38 @@ def save_json(data,
                 return
         print(f"[INFO] file saved at {save_dir}.")
                 
+
+def save_model_weights(model, 
+                       save_path, 
+                       save_as,
+                       tag = None,
+                       ):
+        """
+        save model weights
+        """
+        tag = "" if tag is None else tag
+        try:
+                print(f"[INFO] Saving model at {save_path}")
+                save_path = Path(save_path)
+                save_path.mkdir(parents=True, exist_ok=True)
+                save_path = str(save_path / f"{save_as}_{tag}.h5")
+                model.save(save_path)
+        except Exception as e:
+                print(f"[ERROR] model couldn't be saved at {save_path}")
+                
+def save_logs(logs,save_path,save_as):
+        """
+                save logs to json file given the logs (metrics) dictionary
+        """
+        save_path = Path(save_path)
+        try:
+                print(f"[INFO] Saving logs at {save_path}")
+                save_path.mkdir(parents=True, exist_ok=True)
+                save_path = save_path / f"{save_as}"
+                assert save_path.suffix == '.json', "file name must have .json extension"
+                save_path = str(save_path)
+                with open(save_path, 'w') as fp:
+                        json.dump(logs, fp,default=np_encoder)
+        except Exception as e:
+                print(f"[ERROR] model couldn't be saved at {save_path}")
+        

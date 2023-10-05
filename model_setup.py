@@ -57,7 +57,7 @@ def residual_blocks(x,
 # ## 
 def FeatureEmbeddingBlock(inputs,
                             output_channels = 64,
-                            blocks_count=3):
+                            blocks_count=1):
     """
     Feature Embedding Block 
     """

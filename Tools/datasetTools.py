@@ -18,8 +18,8 @@ def _get_warped_sampled(images, homography_matrices, source_shape=(128,128)):
     if len(images.shape) == 3:
         images = np.expand_dims(images, axis=0)
     height_template, width_template = source_shape
-    
     batch_size = images.shape[0]
+
     
     _warper = Warper(batch_size,height_template=height_template,width_template=width_template)
     warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
