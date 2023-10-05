@@ -1,4 +1,6 @@
 data
+# logs
+models
 
 # ignore cython files
 global-exclude *.pyx
