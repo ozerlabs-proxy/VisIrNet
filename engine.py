@@ -15,20 +15,18 @@ import Tools.datasetTools as DatasetTools
 import Tools.utilities as common_utils
 from collections import defaultdict
 
+
+
+
 def train_step_first_stage(model,
-                        dataloader,
-                        optimizer):   
+                            dataloader,
+                            optimizer):  
+    
+    dataloader = dataloader.shuffle(1000)   
     model.compile(optimizer=optimizer) 
-    epoch_losses_dict= {
-                        "fir_frgb": [],
-                        "fir_Iir": [],
-                        "frgb_Irgb": [],
-                        "fir_Irgb": [],
-                        "frgb_Iir": [],
-                        "ir_Irgb": [],
-                        "total_loss": []
-                    }
-    for i, batch in tqdm(enumerate(dataloader)):
+    epochs_losses_summary= defaultdict(list)
+    
+    for i, batch in tqdm(enumerate(dataloader.take(8))):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -43,20 +41,8 @@ def train_step_first_stage(model,
         with tf.GradientTape() as tape:
                 rgb_fmaps , ir_fmaps=model.call((input_images, template_images),training=True)
                 warped_fmaps,_ = DatasetTools._get_warped_sampled(rgb_fmaps, gt_matrix)
-                
-                # compute similarity losses                
-                _fir_frgb = loss_functions.compute_similarity_differences_mse(template_images, warped_fmaps)#should be minimal
-                _fir_Iir = loss_functions.compute_similarity_differences_mse(ir_fmaps,template_images)
-                _frgb_Irgb = loss_functions.compute_similarity_differences_mse(warped_fmaps,warped_inputs)#should be minimal
-                _fir_Irgb = loss_functions.compute_similarity_differences_mse(ir_fmaps,warped_inputs)#should be minimal
-                _frgb_Iir = loss_functions.compute_similarity_differences_mse(warped_fmaps,template_images)#
-                _Iir_Irgb = loss_functions.compute_similarity_differences_mse(template_images,warped_inputs)
-                
-                losses_weights = [1,.001,1,1,.0000001,.0000001]
-                losses = [_fir_frgb, _fir_Iir, _frgb_Irgb, _fir_Irgb, _frgb_Iir, _Iir_Irgb]
-                losses = [i*j for i,j in zip(losses,losses_weights)]
-                total_loss = tf.math.reduce_sum(losses)
-                
+                                
+                total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps)
                 # loss shouldn't be nan
                 assert not np.isnan(total_loss.numpy()), "Loss is NaN"
                 
@@ -65,43 +51,27 @@ def train_step_first_stage(model,
         grads = [tf.clip_by_value(i,-0.1,0.1) for i in grads]
         optimizer.apply_gradients(zip(grads, all_parameters))
         
-        # create losss dictionary
-        batch_losses = {"fir_frgb": _fir_frgb.numpy(),
-                        "fir_Iir": _fir_Iir.numpy(),
-                        "frgb_Irgb": _frgb_Irgb.numpy(),
-                        "fir_Irgb": _fir_Irgb.numpy(),
-                        "frgb_Iir": _frgb_Iir.numpy(),
-                        "ir_Irgb": _Iir_Irgb.numpy(),
-                        "total_loss": total_loss.numpy()}
         # add losses to epoch losses
-        for key, value in batch_losses.items():
-            epoch_losses_dict[key].append(value)
+        for key, value in detailed_batch_losses.items():
+            epochs_losses_summary[key].append(value)
             
-        # log = " ".join([str(i + " :" + k + "\n") for i,k in batch_losses.items()])
+        # log = " ".join([str(i + " :" + k + "\n") for i,k in detailed_batch_losses.items()])
         # print(log)
     
     # compute mean of losses
-    for key, value in epoch_losses_dict.items():
-        epoch_losses_dict[key] = np.mean(value)
+    for key, value in epochs_losses_summary.items():
+        epochs_losses_summary[key] = np.mean(value)
     
     # display losses
     # display losses
-    log = "|".join([str(str(i)+ " :" + str(k)) for i,k in epoch_losses_dict.items()])
+    log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary.items()])
     print(f"[train_loss] : {log}")
-    return epoch_losses_dict
+    return epochs_losses_summary
 
 def test_step__first_stage(model,
                         dataloader): 
-    epoch_losses_dict= {
-                        "fir_frgb": [],
-                        "fir_Iir": [],
-                        "frgb_Irgb": [],
-                        "fir_Irgb": [],
-                        "frgb_Iir": [],
-                        "ir_Irgb": [],
-                        "total_loss": []
-                    }
-    for i, batch in enumerate(dataloader):
+    epochs_losses_summary= defaultdict(list)
+    for i, batch in enumerate(dataloader.take(8)):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -113,49 +83,30 @@ def test_step__first_stage(model,
         gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
         warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
         
-        rgb_fmaps , ir_fmaps=model.call((input_images, template_images),training=False)
+        rgb_fmaps , ir_fmaps=model.call((input_images, template_images), training=False)
         warped_fmaps,_ = DatasetTools._get_warped_sampled(rgb_fmaps, gt_matrix)
         
-        # compute similarity losses                
-        _fir_frgb = loss_functions.compute_similarity_differences_mse(template_images, warped_fmaps)#should be minimal
-        _fir_Iir = loss_functions.compute_similarity_differences_mse(ir_fmaps,template_images)
-        _frgb_Irgb = loss_functions.compute_similarity_differences_mse(warped_fmaps,warped_inputs)#should be minimal
-        _fir_Irgb = loss_functions.compute_similarity_differences_mse(ir_fmaps,warped_inputs)#should be minimal
-        _frgb_Iir = loss_functions.compute_similarity_differences_mse(warped_fmaps,template_images)#
-        _Iir_Irgb = loss_functions.compute_similarity_differences_mse(template_images,warped_inputs)
-        
-        losses_weights = [1,.001,1,1,.0000001,.0000001]
-        losses = [_fir_frgb, _fir_Iir, _frgb_Irgb, _fir_Irgb, _frgb_Iir, _Iir_Irgb]
-        losses = [i*j for i,j in zip(losses,losses_weights)]
-        total_loss = tf.math.reduce_sum(losses)
+        total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps)
         
         # loss shouldn't be nan
         assert not np.isnan(total_loss.numpy()), "Loss is NaN"
-
-        # create losss dictionary
-        batch_losses = {"fir_frgb": _fir_frgb.numpy(),
-                        "fir_Iir": _fir_Iir.numpy(),
-                        "frgb_Irgb": _frgb_Irgb.numpy(),
-                        "fir_Irgb": _fir_Irgb.numpy(),
-                        "frgb_Iir": _frgb_Iir.numpy(),
-                        "ir_Irgb": _Iir_Irgb.numpy(),
-                        "total_loss": total_loss.numpy()}
+        
         # add losses to epoch losses
-        for key, value in batch_losses.items():
-            epoch_losses_dict[key].append(value)
+        for key, value in detailed_batch_losses.items():
+            epochs_losses_summary[key].append(value)
             
         # log = " ".join([str(i + " :" + k + "\n") for i,k in batch_losses.items()])
         # print(log)
     
     # compute mean of losses
-    for key, value in epoch_losses_dict.items():
-        epoch_losses_dict[key] = np.mean(value)
+    for key, value in epochs_losses_summary.items():
+        epochs_losses_summary[key] = np.mean(value)
     
     # display losses
-    log = "|".join([str(str(i)+ " :" + str(k)) for i,k in epoch_losses_dict.items()])
+    log = " | ".join([str(str(i)+ " :" + str(k)) for i,k in epochs_losses_summary.items()])
     print(f"[test_loss] : {log}")
     
-    return epoch_losses_dict
+    return epochs_losses_summary
 
 def train_first_stage(model: tf.keras.Model,
                     train_dataloader,
@@ -195,14 +146,6 @@ def train_first_stage(model: tf.keras.Model,
         
         _per_epoch_test_results = test_step__first_stage(model=model,
                                                     dataloader=test_dataloader)
-        
-
-        # 5. Update logs dictionary
-        for k,v in _per_epoch_train_losses.items():
-            log_tag["per_epoch_metrics"]["train_loss"][k].append(v)
-        for k,v in _per_epoch_test_results.items():
-            log_tag["per_epoch_metrics"]["test_results"][k].append(v)
-        
         # 6. Save model
         if (epoch+1) % save_frequency == 0:
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)
@@ -210,13 +153,22 @@ def train_first_stage(model: tf.keras.Model,
                                             save_path=save_path,
                                             save_as=save_as,
                                             tag=str(hard_tag))
-    end_time = timer()
-    training_time = f"{(end_time-start_time)/3600:.2f} hours"
-    log_tag["training_time"] = training_time
+            
+    
+        # could be functionalized
+        # 8.  Update logs dictionary
+        for k,v in _per_epoch_train_losses.items():
+            log_tag["per_epoch_metrics"]["train_loss"][k].append(v)
+        for k,v in _per_epoch_test_results.items():
+            log_tag["per_epoch_metrics"]["test_results"][k].append(v)
+        
+        end_time = timer()
+        training_time = f"{(end_time-start_time)/3600:.2f} hours"
+        log_tag["training_time"] = training_time
 
-    # 7. Save results
-    common_utils.save_logs(logs=log_tag,
-                            save_path="logs",
-                            save_as=f"{log_tag['tag_name']}.json")
+        # 7. Save results
+        common_utils.save_logs(logs=log_tag,
+                                save_path="logs",
+                                save_as=f"{log_tag['tag_name']}.json")
                                 
     return log_tag["per_epoch_metrics"] 
