@@ -36,7 +36,6 @@ def compute_similarity_differences_mse(img_1, img_2):
     return tf.math.reduce_mean(tf.math.square(img_1-img_2))
     
     
-
 def combine_ssim_losses(ssim_fir_frgb,
                         ssim_fir_Iir,
                         ssim_frgb_Irgb,
@@ -47,9 +46,8 @@ def combine_ssim_losses(ssim_fir_frgb,
     margin_ir= margin_factor * ssim_fir_Iir
     total_loss= ssim_frgb_Irgb + 0.5*(ssim_fir_frgb  + ssim_fir_Irgb) + margin_ir
     return total_loss
+   
     
-
-
 def get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps):
         """
         Given feature maps, and images compute losses and return them in dictionary
@@ -82,3 +80,26 @@ def get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps):
                                     }
         
         return total_loss_mse , detailed_batch_losses
+    
+def get_losses_regression_head_corners(predictions, gt_matrix):
+    pass
+    
+def get_losses_regression_head(predictions, 
+                                gt_matrix , 
+                                predictions_are_homographies=False):
+    """ 
+    Given predicted matrix and ground truth matrix compute losses and return them in dictionary
+    """
+    
+    # # 1. predictions are corners
+    # if predictions_are_homographies:
+    #     # 1.1 convert homographies to corners
+    #     predictions = common_utils.homographies_to_corners(predictions)
+    
+    
+    
+    # # 2. predictions are homographies
+    return 90, {"total_loss":90}
+    
+
+    

@@ -38,3 +38,23 @@ def get_fmaps_in_suitable_shape(feature_maps):
                                                 kernel_initializer=initializer,
                                                 input_shape=input_shape[1:])(y_intermediate)
     return transformed_fmaps
+
+
+def get_padded_fmaps(fmaps, desired_shape):
+    """
+     Convert feature maps from ir feb to have same size as rgb fmaps
+     Args:
+            fmaps: feature maps from ir feb
+            dsired_shape: shape of the rgb fmaps (batch, height, width, channels)
+    """
+    assert len(fmaps.shape) == 4, "[ERROR] fmaps must have 4 dimensions"
+    assert len(desired_shape) == 4, "[ERROR] desired_shape must have 4 dimensions"
+    
+    desired_height = desired_shape[1]
+    desired_width = desired_shape[2]
+    pad_height = (desired_height - fmaps.shape[1]) // 2
+    pad_width = (desired_width - fmaps.shape[2]) // 2
+    paddings = [[0,0], [pad_height, pad_height], [pad_width, pad_width], [0,0]]
+    ir_fmaps_padded = tf.pad(fmaps, paddings=paddings, mode="CONSTANT", constant_values=0)
+    
+    return ir_fmaps_padded

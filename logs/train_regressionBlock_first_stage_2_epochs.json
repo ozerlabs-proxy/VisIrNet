@@ -1,0 +1,60 @@
+{
+    "model-name": "regressionBlock",
+    "epochs": 2,
+    "resumed_from": null,
+    "train_size": 13850,
+    "test_size": 3995,
+    "featureEmbeddingBackBone": null,
+    "tag_name": "train_regressionBlock_first_stage_2_epochs",
+    "per_epoch_metrics": {
+        "backbone_train_loss": {
+            "fir_frgb": [
+                18539.849609375,
+                14287.298828125
+            ],
+            "fir_Iir": [
+                10434.8828125,
+                11275.154296875
+            ],
+            "frgb_Irgb": [
+                24329.5078125,
+                25872.5546875
+            ],
+            "fir_Irgb": [
+                13233.9931640625,
+                14945.205078125
+            ],
+            "frgb_Iir": [
+                18539.849609375,
+                14287.298828125
+            ],
+            "ir_Irgb": [
+                22737.84765625,
+                27186.921875
+            ],
+            "total_loss": [
+                56113.7890625,
+                55116.3359375
+            ]
+        },
+        "backbone_test_results": {},
+        "train_loss": {
+            "total_loss": [
+                90,
+                90
+            ]
+        },
+        "test_results": {
+            "test_loss": [
+                [
+                    0
+                ],
+                [
+                    0
+                ]
+            ]
+        }
+    },
+    "training_time": "0.01 hours",
+    "featureEmbeddingBackbone": "models/featureEmbeddingBackBone_1.keras"
+}

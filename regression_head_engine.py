@@ -15,14 +15,23 @@ from collections import defaultdict
 
 
 
-# train step for the feature embedding backbone
+# train step for regression head
 def train_step(model,
-                            dataloader,
-                            optimizer):  
+                backBone,
+                dataloader,
+                optimizer):  
+    """
+    A train step for the regression head
+    """
     
     dataloader = dataloader.shuffle(1000)   
+        
     model.compile(optimizer=optimizer) 
-    epochs_losses_summary= defaultdict(list)
+    epochs_losses_summary= {"backbone": defaultdict(list),
+                            "regression_head": defaultdict(list)
+                            }
+    
+    assert backBone is not None, "the feature embedding backbone is not defined"
     
     for i, batch in tqdm(enumerate(dataloader.take(8))):
         input_images, template_images, labels,_instances = batch
@@ -33,15 +42,29 @@ def train_step(model,
             template_images  = tf.expand_dims(template_images, axis=0)
             labels = tf.expand_dims(labels, axis=0)
         
+        # pass the input images through the backbone
+        
+        
         gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
         warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
         
+        rgb_fmaps , ir_fmaps = backBone.call((input_images, template_images),training=False)
+        
+        # padd the ir_fmaps to match the shape of the rgb_fmaps
+        
+        
+        ir_fmaps_padded = backboneUtils.get_padded_fmaps(fmaps=ir_fmaps, desired_shape = rgb_fmaps.shape)
+        # concatenate the rgb_fmaps and ir_fmaps
+        concatenated_fmaps = tf.concat([rgb_fmaps, ir_fmaps_padded], axis=-1)
+        
         with tf.GradientTape() as tape:
-                rgb_fmaps , ir_fmaps=model.call((input_images, template_images),training=True)
-                warped_fmaps,_ = DatasetTools._get_warped_sampled(rgb_fmaps, gt_matrix)
-                                
-                total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps)
-                # loss shouldn't be nan
+                predictions = model.call((concatenated_fmaps),training=True)
+                
+                total_loss , detailed_batch_losses = loss_functions.get_losses_regression_head(predictions,
+                                                                                                gt_matrix,
+                                                                                                predictions_are_homographies=False)
+                
+                total_loss = tf.reduce_mean(tf.math.square(predictions))# TODO: fix me !1!!
                 assert not np.isnan(total_loss.numpy()), "Loss is NaN"
                 
         all_parameters= model.trainable_variables
@@ -51,57 +74,32 @@ def train_step(model,
         
         # add losses to epoch losses
         for key, value in detailed_batch_losses.items():
-            epochs_losses_summary[key].append(value)
+            epochs_losses_summary["regression_head"][key].append(value)
             
+            
+        # backbone losses 
+        warped_fmaps,_ = DatasetTools._get_warped_sampled(rgb_fmaps, gt_matrix)                        
+        total_loss_backbone , detailed_batch_losses_backbone = loss_functions.get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps)
+        # loss shouldn't be nan
+        assert not np.isnan(total_loss_backbone.numpy()), "Loss is NaN"    
+        # add losses to epoch losses
+        for key, value in detailed_batch_losses_backbone.items():
+            epochs_losses_summary["backbone"][key].append(value)  
         # log = " ".join([str(i + " :" + k + "\n") for i,k in detailed_batch_losses.items()])
         # print(log)
     
     # compute mean of losses
-    for key, value in epochs_losses_summary.items():
-        epochs_losses_summary[key] = np.mean(value)
-    
+    for step, losses in epochs_losses_summary.items():
+        for key, value in losses.items():
+            epochs_losses_summary[step][key] = np.mean(value)
+
     # display losses
-    # display losses
-    log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary.items()])
+    log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary["regression_head"].items()])
     print(f"[train_loss] : {log}")
     return epochs_losses_summary
-# test step for the feature embedding backbone
-def test_step(model,
-                        dataloader): 
-    epochs_losses_summary= defaultdict(list)
-    for i, batch in enumerate(dataloader.take(8)):
-        input_images, template_images, labels,_instances = batch
-        
-        # add batch dim if shape is not (batch_size, height, width, channels)
-        if len(input_images.shape) != 4:
-            input_images = tf.expand_dims(input_images, axis=0)
-            template_images  = tf.expand_dims(template_images, axis=0)
-            labels = tf.expand_dims(labels, axis=0)
-        
-        gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
-        warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
-        
-        rgb_fmaps , ir_fmaps=model.call((input_images, template_images), training=False)
-        warped_fmaps,_ = DatasetTools._get_warped_sampled(rgb_fmaps, gt_matrix)
-        
-        total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps)
-        
-        # loss shouldn't be nan
-        assert not np.isnan(total_loss.numpy()), "Loss is NaN"
-        
-        # add losses to epoch losses
-        for key, value in detailed_batch_losses.items():
-            epochs_losses_summary[key].append(value)
-            
-        # log = " ".join([str(i + " :" + k + "\n") for i,k in batch_losses.items()])
-        # print(log)
-    
-    # compute mean of losses
-    for key, value in epochs_losses_summary.items():
-        epochs_losses_summary[key] = np.mean(value)
-    
-    # display losses
-    log = " | ".join([str(str(i)+ " :" + str(k)) for i,k in epochs_losses_summary.items()])
-    print(f"[test_loss] : {log}")
-    
-    return epochs_losses_summary
+
+
+# test step for the regression head
+def test_step(model,dataloader): 
+    print("[INFO] Testing")
+    return {"t": {"test_loss": [0]}}
