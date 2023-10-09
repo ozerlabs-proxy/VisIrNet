@@ -1,0 +1,13 @@
+{
+    "dataset" : "SkyData",
+
+    "BATCH_SIZE" : 2,
+    "SHUFFLE_BUFFER_SIZE" : 100,
+
+    "RGB_INPUTS_SHAPE" : [192,192,3],
+    "IR_INPUTS_SHAPE" :  [128,128,3],
+    "OUTPUT_CHANNELS_PER_BLOCK" : 3,
+    "REGRESSION_INPUT_SHAPE" : null,
+    "REGRESSION_OUTPUT_SHAPE" : 8 
+
+}

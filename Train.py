@@ -1,4 +1,4 @@
-#  ##
+# ##
 import os
 import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -24,10 +24,10 @@ print("len(devices): ", len(devices))
 print(f"available GPUs: {devices}");
 
 
-#  ## [markdown]
+# ## [markdown]
 # **Dataloaders**
 
-#  ##
+# ##
 import data_setup
 
 # try to import the dataset
@@ -39,36 +39,50 @@ train_dataloader,test_dataloader = data_setup.create_dataloaders(dataset=dataset
                                                                 BATCH_SIZE=BATCH_SIZE,
                                                                 SHUFFLE_BUFFER_SIZE=100
                                                                 )
+
+len(train_dataloader), len(test_dataloader)
 #
 
-#  ## [markdown]
+# ## [markdown]
 # ## **Model**
 
-#  ##
+# ##
 import model_setup
 import Utils
-rgb_inputs_shape = (192,192,3)
-ir_inputs_shape =  (128,128,3)
-output_channels_per_block = 3
-regression_input_shape = (*rgb_inputs_shape[:2],output_channels_per_block*2)
-regression_output_shape = 8
 
+# ## [markdown]
+# **configuration**
+# 
+# 
+# or load configuration from a file
 
-#  ##
-featureEmbeddingBackBone = model_setup.getFeatureEmbeddingBackBone(rgb_inputs_shape=rgb_inputs_shape,
-                                                        ir_inputs_shape=ir_inputs_shape,
-                                                        output_channels_per_block=output_channels_per_block
+# ##
+# config constants 
+configs = {
+            'RGB_INPUTS_SHAPE' : (192,192,3),
+            'IR_INPUTS_SHAPE' :  (128,128,3),
+            'OUTPUT_CHANNELS_PER_BLOCK' : 3,
+            'REGRESSION_INPUT_SHAPE' : None,
+            'REGRESSION_OUTPUT_SHAPE' : 8    
+            }
+configs['REGRESSION_INPUT_SHAPE']= (*configs["RGB_INPUTS_SHAPE"][:2], configs["OUTPUT_CHANNELS_PER_BLOCK"]*2)
+assert configs['REGRESSION_INPUT_SHAPE'] != None
+
+# ##
+featureEmbeddingBackBone = model_setup.getFeatureEmbeddingBackBone(rgb_inputs_shape=configs['RGB_INPUTS_SHAPE'],
+                                                        ir_inputs_shape=configs['IR_INPUTS_SHAPE'],
+                                                        output_channels_per_block=configs['OUTPUT_CHANNELS_PER_BLOCK']
                                                         )
 
-regressionHead= model_setup.getRegressionHead(input_shape=regression_input_shape,
-                                                output_size=regression_output_shape
+regressionHead= model_setup.getRegressionHead(input_shape=configs['REGRESSION_INPUT_SHAPE'],
+                                                output_size=configs['REGRESSION_OUTPUT_SHAPE']
                                                 )
 
 
-#  ## [markdown]
+# ## [markdown]
 # **Visualize and save model structures**
 
-#  ##
+# ##
 # # visualize and save models
 
 # Utils.plot_and_save_model_structure(featureEmbeddingBackBone,
@@ -78,11 +92,11 @@ regressionHead= model_setup.getRegressionHead(input_shape=regression_input_shape
 #                                             save_path="resources/",
 #                                             save_as=f"regressionHead")
 
-#  ## [markdown]
+# ## [markdown]
 # ## **Training**
 # 
 
-#  ##
+# ##
 import engine 
 
 initial_learning_rate = 0.001
@@ -90,7 +104,7 @@ lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_ra
                                                                 decay_steps=10000,
                                                                 decay_rate=0.96,
                                                                 staircase=True)
-NUM_EPOCHS = 10
+NUM_EPOCHS = 2
 
 # Setup optimizer
 optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
@@ -113,4 +127,8 @@ model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
 # End the timer and print out how long it took
 end_time = timer()
 print(f"Total training time : {end_time-start_time:.3f} seconds")
+
+# ## [markdown]
+# 
+
 
