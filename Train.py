@@ -99,43 +99,43 @@ regressionHead= model_setup.getRegressionHead(input_shape=configs['REGRESSION_IN
 # ## [markdown]
 # **first stage**
 
-# ##
-# import engine 
+##
+import engine 
 
-# initial_learning_rate = 0.001
-# lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate,
-#                                                                 decay_steps=10000,
-#                                                                 decay_rate=0.96,
-#                                                                 staircase=True)
-# NUM_EPOCHS = 5
+initial_learning_rate = 0.001
+lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate,
+                                                                decay_steps=10000,
+                                                                decay_rate=0.96,
+                                                                staircase=True)
+NUM_EPOCHS = 5
 
-# # Setup optimizer
-# optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+# Setup optimizer
+optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
-# # Start the timer
-# from timeit import default_timer as timer
-# start_time = timer()
-# # Train model 
+# Start the timer
+from timeit import default_timer as timer
+start_time = timer()
+# Train model 
 
-# model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
-#                                                 train_dataloader=train_dataloader,
-#                                                 test_dataloader=test_dataloader,
-#                                                 optimizer=optimizer,
-#                                                 epochs=NUM_EPOCHS,
-#                                                 from_checkpoint="latest",
-#                                                 save_path="models",
-#                                                 save_as=f"featureEmbeddingBackBone",
-#                                                 save_frequency=1,
-#                                                 save_hard_frequency=50
-#                                                 )
-# # End the timer and print out how long it took
-# end_time = timer()
-# print(f"Total training time : {end_time-start_time:.3f} seconds")
+model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
+                                                train_dataloader=train_dataloader,
+                                                test_dataloader=test_dataloader,
+                                                optimizer=optimizer,
+                                                epochs=NUM_EPOCHS,
+                                                from_checkpoint=None,
+                                                save_path=f"models/{dataset}",
+                                                save_as=f"featureEmbeddingBackBone",
+                                                save_frequency=1,
+                                                save_hard_frequency=50
+                                                )
+# End the timer and print out how long it took
+end_time = timer()
+print(f"Total training time : {end_time-start_time:.3f} seconds")
 
-# ## [markdown]
+## [markdown]
 # **second stage**
 
-# ##
+##
 import engine 
 
 initial_learning_rate = 0.0001
@@ -160,40 +160,13 @@ model_results = engine.train_second_stage(model=regressionHead,
                                         optimizer=optimizer,
                                         epochs=NUM_EPOCHS,
                                         from_checkpoint=None,
-                                        save_path="models",
+                                        save_path=f"models/{dataset}",
                                         save_as=f"regressionHead",
                                         save_frequency=1,
-                                        save_hard_frequency=20
+                                        save_hard_frequency=20,
+                                        predicting_homography=True
                                         )
 # End the timer and print out how long it took
 end_time = timer()
 print(f"Total training time : {end_time-start_time:.3f} seconds")
-
-# ## [markdown]
-# 
-
-# ##
-
-
-# ##
-
-
-
-# ##
-
-
-# ##
-
-
-
-
-# ##
-
-
-# ##
-
-
-# ##
-
-
 

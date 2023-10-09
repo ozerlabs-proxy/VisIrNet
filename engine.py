@@ -109,7 +109,8 @@ def train_second_stage(model: tf.keras.Model,
                         save_path="models",
                         save_as=f"regressionHead",
                         save_frequency=1,
-                        save_hard_frequency=50):
+                        save_hard_frequency=50,
+                        predicting_homography=False):
     
 
     # create a tag for the training
@@ -120,6 +121,7 @@ def train_second_stage(model: tf.keras.Model,
                     "train_size": len(train_dataloader),
                     "test_size": len(test_dataloader),
                     "featureEmbeddingBackBone": None,
+                    "predicting_homography": predicting_homography,
                     "tag_name": f"train_{model.name}_first_stage_{epochs}_epochs",
                     "per_epoch_metrics":{
                         "backbone_train_loss": defaultdict(list),
@@ -158,11 +160,14 @@ def train_second_stage(model: tf.keras.Model,
         _per_epoch_train_losses = regression_head_engine.train_step(model=model,
                                                                     backBone=backBone,
                                                                     dataloader=train_dataloader,
-                                                                    optimizer=optimizer)
+                                                                    optimizer=optimizer,
+                                                                    predicting_homography=predicting_homography)
         
         
         _per_epoch_test_results = regression_head_engine.test_step(model=model,
-                                                    dataloader=test_dataloader)
+                                                                    backBone=backBone,
+                                                                    dataloader=test_dataloader,
+                                                                    predicting_homography=predicting_homography)
         # 6. Save model
         if (epoch+1) % save_frequency == 0:
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)
@@ -180,7 +185,7 @@ def train_second_stage(model: tf.keras.Model,
                 log_tag["per_epoch_metrics"][f"{step}train_loss"][key].append(value)
                 
         for step, results in _per_epoch_test_results.items():
-            step = "" if str(step) != "backbone" else "backbone"
+            step = "" if str(step) != "backbone" else "backbone_"
             for key, value in results.items():
                 log_tag["per_epoch_metrics"][f"{step}test_results"][key].append(value)
         

@@ -127,3 +127,84 @@ def is_invertible(homography_matrices):
     invertible = not tf.math.is_nan(inverse_matrices).numpy().any()
     
     return inverse_matrices, invertible
+
+def homographies_to_corners(prediction_matrices):
+    """
+    Given homography matrices compute the corners that initial corners would map to
+    
+    initial corners are [[0,0],[127,0],[0,127],[127,127]]
+    
+    Args:
+        prediction_matrices: [batch_size, 3,3] tensor 
+        
+    Returns:
+        new_four_points: [batch_size, 8] tensor u and v coordinates of the new corners
+        
+    """
+    
+    assert len(prediction_matrices.shape) == 3, "prediction_matrices should be [batch_size, 3,3]"
+    batch_size = prediction_matrices.shape[0]
+    # get initial corners
+    initial_corners = np.asarray([[0,0,1],[127,0,1],[0,127,1],[127,127,1]])
+    initial_corners = np.transpose(initial_corners)
+    initial_corners = np.expand_dims(initial_corners, axis=0)
+    initial_corners = np.tile(initial_corners, [batch_size, 1, 1]).astype(np.float32)
+    initial_corners = tf.dtypes.cast(initial_corners, tf.float32)
+
+    prediction_matrices = tf.dtypes.cast(prediction_matrices, tf.float32)
+    new_four_points = tf.matmul(prediction_matrices, initial_corners)
+
+    new_four_points_scale = new_four_points[:, 2:, :]
+    new_four_points = new_four_points / new_four_points_scale
+
+    new_four_points = new_four_points[:, :2, :]
+    new_four_points = tf.reshape(new_four_points, (-1,8))
+    
+    return new_four_points
+        
+
+def corners_to_homographies(prediction_corners):
+    """
+    Given corners compute the homographies that would map the initial corners to the predicted corners
+    
+    Args:
+        prediction_corners: [batch_size, 8] tensor u and v coordinates of the new corners
+    
+    """
+    
+    """
+        u_v_list: [batch_size, 8]
+        return: [batch_size, 3, 3]
+        homography matrices from u_v_list
+    """
+    assert len(prediction_corners.shape) == 2, "prediction_corners should be [batch_size, 8]"
+    batch_size = prediction_corners.shape[0]
+    u_list = prediction_corners[:, :4]
+    v_list = prediction_corners[:, 4:]
+    
+    matrix_list = []
+    for i in range(batch_size):
+        src_points = [[0, 0], [127, 0],[0, 127], [127, 127]]
+        
+        tgt_points = np.concatenate([u_list[i:(i + 1), :], v_list[i:(i + 1), :]], axis=0)
+        tgt_points = np.transpose(tgt_points)
+        tgt_points = np.expand_dims(tgt_points, axis=1)
+
+        src_points = np.reshape(src_points, [4, 1, 2])
+        tgt_points = np.reshape(tgt_points, [4, 1, 2])
+        # find homography
+        h_matrix, _ = cv2.findHomography(src_points.astype(np.float32), 
+                                                tgt_points.astype(np.float32), 
+                                                0)
+        matrix_size = h_matrix.size
+        if matrix_size == 0:
+            h_matrix = np.zeros([3, 3]) * np.nan
+        matrix_list.append(h_matrix)
+        
+    homography_matrices = np.asarray(matrix_list).astype(np.float32)
+    dividend = homography_matrices[...,2,2]
+    dividend = tf.expand_dims(dividend, axis=-1)
+    dividend = tf.expand_dims(dividend, axis=-1)
+    homography_matrices = tf.divide(homography_matrices,dividend)
+    assert not tf.math.is_nan(homography_matrices).numpy().any(), "homography matrices have nan values"
+    return homography_matrices
