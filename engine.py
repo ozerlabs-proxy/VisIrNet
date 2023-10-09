@@ -23,6 +23,7 @@ def train_first_stage(model: tf.keras.Model,
                     test_dataloader,
                     optimizer,
                     epochs=1,
+                    from_checkpoint=None,
                     save_path="models",
                     save_as=f"featureEmbeddingBackBone",
                     save_frequency=1,
@@ -30,8 +31,9 @@ def train_first_stage(model: tf.keras.Model,
     
     # create a tag for the training
     log_tag = {
-                    "model.name": model.name,
+                    "model-name": model.name,
                     "epochs": epochs,
+                    "resumed_from": None,
                     "train_size": len(train_dataloader),
                     "test_size": len(test_dataloader),
                     "tag_name": f"train_{model.name}_first_stage_{epochs}_epochs",
@@ -40,11 +42,22 @@ def train_first_stage(model: tf.keras.Model,
                                             },
                     "training_time": 0     
                 }
+    
+    #if from_checkpoint is not None load the saved model
+    if from_checkpoint is not None:
+        pattern = f"*" if str(from_checkpoint)=="latest" else f"{from_checkpoint}*"
+        model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
+        log_tag["resumed_from"] = str(model_name)
+        model = common_utils.load_model(model_name)
+        
+        
+        
     # 2. Create empty results dictionary
     print(f"[INFO] Training{model.name} for {epochs} epochs")
 
     from timeit import default_timer as timer
     start_time = timer()
+    
     
     # 3. Loop over the epochs
     for  epoch in range(epochs):

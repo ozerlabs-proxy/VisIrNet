@@ -2,6 +2,7 @@ import json
 import numpy as np
 from pathlib import Path
 import tensorflow as tf
+from pathlib import Path
 
 def tensor_has_nan(some_tensor):
         """
@@ -76,3 +77,29 @@ def save_logs(logs,save_path,save_as):
         except Exception as e:
                 print(f"[ERROR] model couldn't be saved at {save_path}")
         
+
+# get latest file from a directory
+def latest_file(path: Path, 
+                pattern: str = "*"):
+        """
+        Given a path and a pattern return the latest file in the directory
+        """
+        files = path.glob(pattern)
+        assert any(files), f"could not find any file with pattern {pattern} in {path}"
+        return max(files, key=lambda x: x.stat().st_ctime)
+
+def load_model(model_path:Path = None):
+    """
+    Given a path load the model
+    Args:
+        mode_path (str): path to the model
+    Returns:
+        model (tf.keras.Model): the loaded model
+    """
+    try:
+        print(f"[INFO] loading model from {model_path}")
+        model = tf.keras.models.load_model(model_path)
+    except:
+        print(f"[ERROR] model not found at {model_path}")
+        raise Exception("Model not found")
+    return model
