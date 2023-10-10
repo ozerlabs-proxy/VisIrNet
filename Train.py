@@ -25,19 +25,42 @@ print(f"available GPUs: {devices}");
 
 
 # ## [markdown]
+# **Configurations**
+
+# ##
+# config file to load will be passed as an argument
+# get run parameters
+
+import argparse 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--config-file', 
+                        action = "store", 
+                        dest = "config_file",
+                        default = "default_config.json",
+                        help = 'specify config file to load')
+
+input_arguments = parser.parse_args([])
+
+from Tools.configurations_parser import ConfigurationParser
+# load configurations
+configs = ConfigurationParser.getConfigurations(configs_path = 'configs', 
+                                                config_file = str(input_arguments.config_file))
+
+
+# print configurations
+ConfigurationParser.printConfigurations(configs)
+
+
+# ## [markdown]
 # **Dataloaders**
 
 # ##
 import data_setup
 
-# try to import the dataset
-dataset="SkyData"
-BATCH_SIZE = 2
-SHUFFLE_BUFFER_SIZE = 100
-
-train_dataloader,test_dataloader = data_setup.create_dataloaders(dataset=dataset, 
-                                                                BATCH_SIZE=BATCH_SIZE,
-                                                                SHUFFLE_BUFFER_SIZE=100
+train_dataloader,test_dataloader = data_setup.create_dataloaders(dataset=configs.dataset, 
+                                                                BATCH_SIZE=configs.BATCH_SIZE,
+                                                                SHUFFLE_BUFFER_SIZE=configs.SHUFFLE_BUFFER_SIZE
                                                                 )
 
 len(train_dataloader), len(test_dataloader)
@@ -50,47 +73,34 @@ len(train_dataloader), len(test_dataloader)
 import model_setup
 import Utils
 
-# ## [markdown]
-# **configuration**
-# 
-# 
-# or load configuration from a file
-
-# ##
-# config constants 
-configs = {
-            'RGB_INPUTS_SHAPE' : (192,192,3),
-            'IR_INPUTS_SHAPE' :  (128,128,3),
-            'OUTPUT_CHANNELS_PER_BLOCK' : 3,
-            'REGRESSION_INPUT_SHAPE' : None,
-            'REGRESSION_OUTPUT_SHAPE' : 8    
-            }
-configs['REGRESSION_INPUT_SHAPE']= (*configs["RGB_INPUTS_SHAPE"][:2], configs["OUTPUT_CHANNELS_PER_BLOCK"]*2)
-assert configs['REGRESSION_INPUT_SHAPE'] != None
-
-# ##
-featureEmbeddingBackBone = model_setup.getFeatureEmbeddingBackBone(rgb_inputs_shape=configs['RGB_INPUTS_SHAPE'],
-                                                        ir_inputs_shape=configs['IR_INPUTS_SHAPE'],
-                                                        output_channels_per_block=configs['OUTPUT_CHANNELS_PER_BLOCK']
+featureEmbeddingBackBone = model_setup.getFeatureEmbeddingBackBone(rgb_inputs_shape=configs.RGB_INPUTS_SHAPE,
+                                                        ir_inputs_shape=configs.IR_INPUTS_SHAPE,
+                                                        output_channels_per_block=configs.OUTPUT_CHANNELS_PER_BLOCK
                                                         )
 
-regressionHead= model_setup.getRegressionHead(input_shape=configs['REGRESSION_INPUT_SHAPE'],
-                                                output_size=configs['REGRESSION_OUTPUT_SHAPE']
+regressionHead= model_setup.getRegressionHead(input_shape=configs.REGRESSION_INPUT_SHAPE,
+                                                output_size=configs.REGRESSION_OUTPUT_SHAPE
                                                 )
 
 
 # ## [markdown]
 # **Visualize and save model structures**
+# 
 
-# ##
+# ## [markdown]
+# 
+# ```python
+# 
 # # visualize and save models
-
+# 
 # Utils.plot_and_save_model_structure(featureEmbeddingBackBone,
 #                                             save_path="resources/",
 #                                             save_as=f"featureEmbeddingBackBone")
 # Utils.plot_and_save_model_structure(regressionHead,
 #                                             save_path="resources/",
 #                                             save_as=f"regressionHead")
+# 
+# ```
 
 # ## [markdown]
 # ## **Training**
@@ -102,73 +112,76 @@ regressionHead= model_setup.getRegressionHead(input_shape=configs['REGRESSION_IN
 # ##
 import engine 
 
-initial_learning_rate = 0.001
-lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate,
-                                                                decay_steps=10000,
-                                                                decay_rate=0.96,
-                                                                staircase=True)
-NUM_EPOCHS = 5
+if configs.TrainFirstStage:
+    print("*"*25, f"first stage", "*"*25)
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=configs.B_initial_learning_rate,
+                                                                    decay_steps=configs.B_decay_steps,
+                                                                    decay_rate=configs.B_decay_rate,
+                                                                    staircase=True)
 
-# Setup optimizer
-optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
-# Start the timer
-from timeit import default_timer as timer
-start_time = timer()
-# Train model 
+    # Setup optimizer
+    optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
-model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
-                                                train_dataloader=train_dataloader,
-                                                test_dataloader=test_dataloader,
-                                                dataset_name=dataset,
-                                                optimizer=optimizer,
-                                                epochs=NUM_EPOCHS,
-                                                from_checkpoint=None,
-                                                save_path=f"models/{dataset}",
-                                                save_as=f"featureEmbeddingBackBone",
-                                                save_frequency=1,
-                                                save_hard_frequency=50
-                                                )
-# End the timer and print out how long it took
-end_time = timer()
-print(f"Total training time : {end_time-start_time:.3f} seconds")
+    # Start the timer
+    from timeit import default_timer as timer
+    start_time = timer()
+    # Train model 
+
+    model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
+                                                    train_dataloader=train_dataloader,
+                                                    test_dataloader=test_dataloader,
+                                                    dataset_name=configs.dataset,
+                                                    optimizer=optimizer,
+                                                    epochs=configs.B_NUM_EPOCHS,
+                                                    from_checkpoint=configs.B_from_checkpoint,
+                                                    save_path=configs.B_save_path,
+                                                    save_as=configs.B_save_as,
+                                                    save_frequency=configs.B_save_frequency,
+                                                    save_hard_frequency=configs.B_save_hard_frequency,
+                                                    )
+    # End the timer and print out how long it took
+    end_time = timer()
+    print(f"Total training time : {end_time-start_time:.3f} seconds\n\n")
 
 # ## [markdown]
-# # **second stage**
+# **second stage**
 
-##
+# ##
 import engine 
 
-initial_learning_rate = 0.0001
-lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate,
-                                                                decay_steps=10000,
-                                                                decay_rate=0.96,
-                                                                staircase=True)
-NUM_EPOCHS = 2
+if configs.TrainSecondStage:
+    print("*"*25, f"second stage", "*"*25)
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=configs.R_initial_learning_rate,
+                                                                    decay_steps=configs.R_decay_steps,
+                                                                    decay_rate=configs.R_decay_rate,
+                                                                    staircase=True)
 
-# Setup optimizer
-optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
-# Start the timer
-from timeit import default_timer as timer
-start_time = timer()
-# Train model 
+    # Setup optimizer
+    optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
-model_results = engine.train_second_stage(model=regressionHead,
-                                        featureEmbeddingBackBone="latest",
-                                        train_dataloader=train_dataloader,
-                                        test_dataloader=test_dataloader,
-                                        dataset_name=dataset,
-                                        optimizer=optimizer,
-                                        epochs=NUM_EPOCHS,
-                                        from_checkpoint=None,
-                                        save_path=f"models/{dataset}",
-                                        save_as=f"regressionHead",
-                                        save_frequency=1,
-                                        save_hard_frequency=20,
-                                        predicting_homography=True
-                                        )
-# End the timer and print out how long it took
-end_time = timer()
-print(f"Total training time : {end_time-start_time:.3f} seconds")
+    # Start the timer
+    from timeit import default_timer as timer
+    start_time = timer()
+    # Train model 
+
+    model_results = engine.train_second_stage(model = regressionHead,
+                                            featureEmbeddingBackBone = configs.R_featureEmbeddingBackBone,
+                                            train_dataloader = train_dataloader,
+                                            test_dataloader = test_dataloader,
+                                            dataset_name = configs.dataset,
+                                            optimizer = optimizer,
+                                            epochs = configs.R_NUM_EPOCHS,
+                                            from_checkpoint = configs.R_from_checkpoint,
+                                            save_path = configs.R_save_path,
+                                            save_as = configs.R_save_as,
+                                            save_frequency = configs.R_save_frequency,
+                                            save_hard_frequency = configs.R_save_hard_frequency,
+                                            predicting_homography = configs.R_predicting_homography
+                                            )
+    # End the timer and print out how long it took
+    end_time = timer()
+    print(f"Total training time : {end_time-start_time:.3f} seconds\n\n")
+
 
