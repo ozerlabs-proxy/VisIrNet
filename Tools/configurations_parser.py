@@ -1,6 +1,7 @@
 from collections import namedtuple
 import json
 from pathlib import Path
+import uuid
 
 class ConfigurationParser():
     
@@ -28,6 +29,7 @@ class ConfigurationParser():
         Configs = Configs._replace(REGRESSION_INPUT_SHAPE = [*Configs.RGB_INPUTS_SHAPE[:2], Configs.OUTPUT_CHANNELS_PER_BLOCK*2])
         Configs = Configs._replace(B_save_path = f"models/{Configs.dataset}")
         Configs = Configs._replace(R_save_path = f"models/{Configs.dataset}")
+        Configs = Configs._replace(B_R_uuid = f"{str(uuid.uuid4().hex)}")
         #
         
         assert Configs.REGRESSION_INPUT_SHAPE != None, "REGRESSION_INPUT_SHAPE should not be None"

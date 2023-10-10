@@ -2,6 +2,7 @@
     "dataset" : "SkyData",
     "TrainFirstStage" : true,
     "TrainSecondStage" : true,
+    "B_R_uuid" : null,
 
     "BATCH_SIZE" : 2,
     "SHUFFLE_BUFFER_SIZE" : 100,

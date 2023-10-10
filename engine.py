@@ -29,7 +29,8 @@ def train_first_stage(model: tf.keras.Model,
                     save_path="models",
                     save_as=f"featureEmbeddingBackBone",
                     save_frequency=1,
-                    save_hard_frequency=50):
+                    save_hard_frequency=50,
+                    uuid=""):
     
     # create a tag for the training
     log_tag = {
@@ -38,7 +39,7 @@ def train_first_stage(model: tf.keras.Model,
                     "resumed_from": None,
                     "train_size": len(train_dataloader),
                     "test_size": len(test_dataloader),
-                    "tag_name": f"{dataset_name}_{model.name}_first_stage_{epochs}_epochs",
+                    "tag_name": f"{dataset_name}-{model.name}-1-{epochs}-{uuid}",
                     "per_epoch_metrics":{"train_loss": defaultdict(list),
                                             "test_results":defaultdict(list)
                                             },
@@ -76,7 +77,7 @@ def train_first_stage(model: tf.keras.Model,
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)
             common_utils.save_model_weights(model=model,
                                             save_path=save_path,
-                                            save_as=save_as,
+                                            save_as=f'{save_as}-{uuid}',
                                             tag=str(hard_tag))
             
     
@@ -112,7 +113,8 @@ def train_second_stage(model: tf.keras.Model,
                         save_as=f"regressionHead",
                         save_frequency=1,
                         save_hard_frequency=50,
-                        predicting_homography=False):
+                        predicting_homography=False,
+                        uuid=""):
     
     homography_based = "homography" if predicting_homography else "corners"
 
@@ -125,7 +127,7 @@ def train_second_stage(model: tf.keras.Model,
                     "test_size": len(test_dataloader),
                     "featureEmbeddingBackBone": None,
                     "predicting_homography": predicting_homography,
-                    "tag_name": f"{dataset_name}_{model.name}_{homography_based}_second_stage_{epochs}_epochs",
+                    "tag_name": f"{dataset_name}-{model.name}-{homography_based}-2-{epochs}-{uuid}",
                     "per_epoch_metrics":{
                         "backbone_train_loss": defaultdict(list),
                         "backbone_test_results":defaultdict(list),
@@ -176,7 +178,7 @@ def train_second_stage(model: tf.keras.Model,
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)
             common_utils.save_model_weights(model=model,
                                             save_path=save_path,
-                                            save_as=save_as,
+                                            save_as=f'{save_as}-{uuid}',
                                             tag=str(hard_tag))
             
     
