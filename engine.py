@@ -22,6 +22,7 @@ import regression_head_engine as regression_head_engine
 def train_first_stage(model: tf.keras.Model,
                     train_dataloader,
                     test_dataloader,
+                    dataset_name,
                     optimizer,
                     epochs=1,
                     from_checkpoint=None,
@@ -37,7 +38,7 @@ def train_first_stage(model: tf.keras.Model,
                     "resumed_from": None,
                     "train_size": len(train_dataloader),
                     "test_size": len(test_dataloader),
-                    "tag_name": f"train_{model.name}_first_stage_{epochs}_epochs",
+                    "tag_name": f"{dataset_name}_{model.name}_first_stage_{epochs}_epochs",
                     "per_epoch_metrics":{"train_loss": defaultdict(list),
                                             "test_results":defaultdict(list)
                                             },
@@ -54,7 +55,7 @@ def train_first_stage(model: tf.keras.Model,
         
         
     # 2. Create empty results dictionary
-    print(f"[INFO] Training{model.name} for {epochs} epochs")
+    print(f"[INFO] Training {model.name} for {epochs} epochs")
 
     from timeit import default_timer as timer
     start_time = timer()
@@ -103,6 +104,7 @@ def train_second_stage(model: tf.keras.Model,
                         featureEmbeddingBackBone,                        
                         train_dataloader ,
                         test_dataloader,
+                        dataset_name,
                         optimizer,
                         epochs=1,
                         from_checkpoint=None,
@@ -112,6 +114,7 @@ def train_second_stage(model: tf.keras.Model,
                         save_hard_frequency=50,
                         predicting_homography=False):
     
+    homography_based = "homography" if predicting_homography else "corners"
 
     # create a tag for the training
     log_tag = {
@@ -122,7 +125,7 @@ def train_second_stage(model: tf.keras.Model,
                     "test_size": len(test_dataloader),
                     "featureEmbeddingBackBone": None,
                     "predicting_homography": predicting_homography,
-                    "tag_name": f"train_{model.name}_first_stage_{epochs}_epochs",
+                    "tag_name": f"{dataset_name}_{model.name}_{homography_based}_second_stage_{epochs}_epochs",
                     "per_epoch_metrics":{
                         "backbone_train_loss": defaultdict(list),
                         "backbone_test_results":defaultdict(list),
@@ -134,21 +137,21 @@ def train_second_stage(model: tf.keras.Model,
     
     #if from_checkpoint is not None load the saved model
     if from_checkpoint is not None:
-        pattern = f"*regressionHead*" if str(from_checkpoint)=="latest" else f"{from_checkpoint}*"
+        pattern = f"*regressionHead*" if str(from_checkpoint)=="latest" else f"*{from_checkpoint}*"
         model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
         log_tag["resumed_from"] = str(model_name)
         model = common_utils.load_model(model_name)
         
     # load the feature embedding backbone
     if featureEmbeddingBackBone is not None:
-        pattern = f"*featureEmbeddingBackBone*" if str(featureEmbeddingBackBone)=="latest" else f"{featureEmbeddingBackBone}*"
+        pattern = f"*featureEmbeddingBackBone*" if str(featureEmbeddingBackBone)=="latest" else f"*{featureEmbeddingBackBone}*"
         model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
         log_tag["featureEmbeddingBackbone"] = str(model_name)
         backBone = common_utils.load_model(model_name)
     
         
     # 2. Create empty results dictionary
-    print(f"[INFO] Training{model.name} for {epochs} epochs")
+    print(f"[INFO] Training {model.name} for {epochs} epochs")
 
     from timeit import default_timer as timer
     start_time = timer()

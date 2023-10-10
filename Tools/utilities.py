@@ -20,8 +20,8 @@ def np_encoder(object):
 
 # save coco format to json file 
 def save_json(data, 
-          save_dir:str,
-          file_name:str):
+                save_dir:str,
+                file_name:str):
         """
         Save the json file
         """
@@ -44,10 +44,10 @@ def save_json(data,
                 
 
 def save_model_weights(model, 
-                       save_path, 
-                       save_as,
-                       tag = None,
-                       ):
+                        save_path, 
+                        save_as,
+                        tag = None,
+                        ):
         """
         save model weights
         """
@@ -84,22 +84,23 @@ def latest_file(path: Path,
         """
         Given a path and a pattern return the latest file in the directory
         """
-        files = path.glob(pattern)
+
+        files = list(path.glob(pattern))
         assert any(files), f"could not find any file with pattern {pattern} in {path}"
-        return max(files, key=lambda x: x.stat().st_ctime)
+        return max(files, key=lambda x: Path(x).stat().st_ctime)
 
 def load_model(model_path:Path = None):
-    """
-    Given a path load the model
-    Args:
-        mode_path (str): path to the model
-    Returns:
-        model (tf.keras.Model): the loaded model
-    """
-    try:
-        print(f"[INFO] loading model from {model_path}")
-        model = tf.keras.models.load_model(model_path)
-    except:
-        print(f"[ERROR] model not found at {model_path}")
-        raise Exception("Model not found")
-    return model
+        """
+        Given a path load the model
+        Args:
+                mode_path (str): path to the model
+        Returns:
+                model (tf.keras.Model): the loaded model
+        """
+        try:
+                print(f"[INFO] loading model from {model_path}")
+                model = tf.keras.models.load_model(model_path)
+        except:
+                print(f"[ERROR] model not found at {model_path}")
+                raise Exception("Model not found")
+        return model

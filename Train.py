@@ -99,7 +99,7 @@ regressionHead= model_setup.getRegressionHead(input_shape=configs['REGRESSION_IN
 # ## [markdown]
 # **first stage**
 
-##
+# ##
 import engine 
 
 initial_learning_rate = 0.001
@@ -120,6 +120,7 @@ start_time = timer()
 model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
                                                 train_dataloader=train_dataloader,
                                                 test_dataloader=test_dataloader,
+                                                dataset_name=dataset,
                                                 optimizer=optimizer,
                                                 epochs=NUM_EPOCHS,
                                                 from_checkpoint=None,
@@ -132,8 +133,8 @@ model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
 end_time = timer()
 print(f"Total training time : {end_time-start_time:.3f} seconds")
 
-## [markdown]
-# **second stage**
+# ## [markdown]
+# # **second stage**
 
 ##
 import engine 
@@ -157,6 +158,7 @@ model_results = engine.train_second_stage(model=regressionHead,
                                         featureEmbeddingBackBone="latest",
                                         train_dataloader=train_dataloader,
                                         test_dataloader=test_dataloader,
+                                        dataset_name=dataset,
                                         optimizer=optimizer,
                                         epochs=NUM_EPOCHS,
                                         from_checkpoint=None,
