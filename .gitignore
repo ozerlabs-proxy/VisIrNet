@@ -12,3 +12,7 @@ global-exclude *.pyo
 
 # ignore build files
 __pycache__
+
+# specific files
+
+trainingJob.sh
