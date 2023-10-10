@@ -86,7 +86,8 @@ def FeatureEmbeddingBlock(inputs,
 # ##
 def getFeatureEmbeddingBackBone(rgb_inputs_shape,
                                 ir_inputs_shape,
-                                output_channels_per_block=64):
+                                output_channels_per_block=64,
+                                blocks_count =1):
         """
         Feature Embedding Backbone
         """
@@ -94,7 +95,8 @@ def getFeatureEmbeddingBackBone(rgb_inputs_shape,
         ir_inputs = layers.Input(shape=ir_inputs_shape)
 
         rgb_feature_embeddings = FeatureEmbeddingBlock(inputs = rgb_inputs, 
-                                                        output_channels = output_channels_per_block)
+                                                        output_channels = output_channels_per_block,
+                                                        blocks_count=blocks_count)
         # rgb_feature_embedding_block = keras.Model(inputs=rgb_inputs,
         #                                   outputs=rgb_feature_embeddings,
         #                                   name="rgb_feature_embedding_block"
@@ -102,7 +104,8 @@ def getFeatureEmbeddingBackBone(rgb_inputs_shape,
 
 
         ir_feature_embeddings = FeatureEmbeddingBlock(inputs = ir_inputs, 
-                                                        output_channels = output_channels_per_block)
+                                                        output_channels = output_channels_per_block,
+                                                        blocks_count=blocks_count)
         # ir_feature_embedding_block= keras.Model(inputs=ir_inputs,
         #                                   outputs=ir_feature_embeddings,
         #                                   name="ir_feature_embedding_block"
