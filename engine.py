@@ -61,8 +61,16 @@ def train_first_stage(model: tf.keras.Model,
     from timeit import default_timer as timer
     start_time = timer()
     
+    # 3. Create summary writer
+    _train_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
+                                                    log_id=f"{dataset_name}-{str(uuid)}",
+                                                    suffix="1-train")
+    _test_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
+                                                    log_id=f"{dataset_name}-{str(uuid)}",
+                                                    suffix="1-test")
+
     
-    # 3. Loop over the epochs
+    # 4. Loop over the epochs
     for  epoch in range(epochs):
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
         _per_epoch_train_losses = backbone_engine.train_step(model=model,
@@ -89,8 +97,12 @@ def train_first_stage(model: tf.keras.Model,
             log_tag["per_epoch_metrics"]["test_results"][k].append(v)
         
         end_time = timer()
-        training_time = f"{(end_time-start_time)/3600:.2f} hours"
-        log_tag["training_time"] = training_time
+        training_time = (end_time-start_time)/3600
+        log_tag["training_time"] = f"{training_time:.2f} hours"
+        
+        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, epoch = epoch ,logs = _per_epoch_train_losses)
+        common_utils.tb_write_summary(_summary_writer = _test_summary_writer, epoch = epoch ,logs = _per_epoch_test_results )
+        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, epoch = epoch ,logs = {"training_time": tf.cast(training_time, tf.float32).numpy()})
 
         # 7. Save results
         common_utils.save_logs(logs=log_tag,
@@ -158,6 +170,13 @@ def train_second_stage(model: tf.keras.Model,
     from timeit import default_timer as timer
     start_time = timer()
     
+    # 3. Create summary writer
+    _train_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
+                                                    log_id=f"{dataset_name}-{str(uuid)}",
+                                                    suffix="2-train")
+    _test_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
+                                                    log_id=f"{dataset_name}-{str(uuid)}",
+                                                    suffix="2-test")
     
     # 3. Loop over the epochs
     for  epoch in range(epochs):
@@ -195,8 +214,21 @@ def train_second_stage(model: tf.keras.Model,
                 log_tag["per_epoch_metrics"][f"{step}test_results"][key].append(value)
         
         end_time = timer()
-        training_time = f"{(end_time-start_time)/3600:.2f} hours"
-        log_tag["training_time"] = training_time
+        training_time = (end_time-start_time)/3600
+        log_tag["training_time"] = f"{training_time:.2f} hours"
+        
+        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = _per_epoch_train_losses["regression_head"]
+                                        )
+        common_utils.tb_write_summary(_summary_writer = _test_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = _per_epoch_test_results["regression_head"] 
+                                        )
+        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = {"training_time": training_time})
+
 
         # 7. Save results
         common_utils.save_logs(logs=log_tag,

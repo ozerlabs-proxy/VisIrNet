@@ -104,3 +104,37 @@ def load_model(model_path:Path = None):
                 print(f"[ERROR] model not found at {model_path}")
                 raise Exception("Model not found")
         return model
+
+def get_summary_writter(log_dir : str = "logs/tensorboard",
+                        log_id : str = "",
+                        suffix : str = ""):
+        
+        """
+        Given a log directory return a summary writer
+        Args:
+                log_dir (str): log directory
+                
+        Returns:
+                _summary_writer (tf.summary.SummaryWriter): summary writer
+        """
+        log_dir = log_dir + "/" + log_id + "/" + suffix
+        _summary_writer = tf.summary.create_file_writer(log_dir)
+        return _summary_writer
+
+def tb_write_summary(_summary_writer,
+                        logs,
+                        epoch):
+        """
+        Given a summary writer and logs write the logs to tensorboard
+        Args:
+                _summary_writer (tf.summary.SummaryWriter): summary writer
+                logs (dict): logs to write
+                epoch (int): epoch number
+        Returns:
+                None
+        """
+        with _summary_writer.as_default():
+                for key, value in logs.items():
+                        # print(f"key: {key}, value: {value}")
+                        tf.summary.scalar(f"{key}", value, epoch)
+                        _summary_writer.flush()

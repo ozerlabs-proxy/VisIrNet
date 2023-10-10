@@ -25,3 +25,14 @@
  pip install tensorflow_graphics
 
 ```
+
+
+## logs
+
+visualize logs from tensorboard
+
+```bash
+# make sure conda env is activated
+conda activate VisIrNet
+tensorboard --logdir logs/tensorboard
+```
