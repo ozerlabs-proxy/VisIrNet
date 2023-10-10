@@ -40,7 +40,7 @@ parser.add_argument('--config-file',
                         default = "default_config.json",
                         help = 'specify config file to load')
 
-input_arguments = parser.parse_args([])
+input_arguments = parser.parse_args()
 
 from Tools.configurations_parser import ConfigurationParser
 # load configurations
@@ -75,11 +75,13 @@ import Utils
 
 featureEmbeddingBackBone = model_setup.getFeatureEmbeddingBackBone(rgb_inputs_shape=configs.RGB_INPUTS_SHAPE,
                                                         ir_inputs_shape=configs.IR_INPUTS_SHAPE,
-                                                        output_channels_per_block=configs.OUTPUT_CHANNELS_PER_BLOCK
+                                                        output_channels_per_block=configs.OUTPUT_CHANNELS_PER_BLOCK,
+                                                        blocks_count=configs.B_STACK_COUNT,
                                                         )
 
 regressionHead= model_setup.getRegressionHead(input_shape=configs.REGRESSION_INPUT_SHAPE,
-                                                output_size=configs.REGRESSION_OUTPUT_SHAPE
+                                                output_size=configs.REGRESSION_OUTPUT_SHAPE,
+                                                blocks_count=configs.R_STACK_COUNT,
                                                 )
 
 
@@ -114,6 +116,8 @@ import engine
 
 if configs.TrainFirstStage:
     print("*"*25, f"first stage", "*"*25)
+    print(f"uuid: {configs.B_R_uuid}")
+    
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=configs.B_initial_learning_rate,
                                                                     decay_steps=configs.B_decay_steps,
                                                                     decay_rate=configs.B_decay_rate,
@@ -139,6 +143,7 @@ if configs.TrainFirstStage:
                                                     save_as=configs.B_save_as,
                                                     save_frequency=configs.B_save_frequency,
                                                     save_hard_frequency=configs.B_save_hard_frequency,
+                                                    uuid=configs.B_R_uuid
                                                     )
     # End the timer and print out how long it took
     end_time = timer()
@@ -152,6 +157,8 @@ import engine
 
 if configs.TrainSecondStage:
     print("*"*25, f"second stage", "*"*25)
+    print(f"uuid: {configs.B_R_uuid}")
+    
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=configs.R_initial_learning_rate,
                                                                     decay_steps=configs.R_decay_steps,
                                                                     decay_rate=configs.R_decay_rate,
@@ -178,10 +185,20 @@ if configs.TrainSecondStage:
                                             save_as = configs.R_save_as,
                                             save_frequency = configs.R_save_frequency,
                                             save_hard_frequency = configs.R_save_hard_frequency,
-                                            predicting_homography = configs.R_predicting_homography
+                                            predicting_homography = configs.R_predicting_homography,
+                                            uuid = configs.B_R_uuid
                                             )
     # End the timer and print out how long it took
     end_time = timer()
     print(f"Total training time : {end_time-start_time:.3f} seconds\n\n")
+
+# ##
+
+
+# ##
+
+
+# ##
+
 
 

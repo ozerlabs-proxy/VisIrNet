@@ -56,7 +56,7 @@ def save_model_weights(model,
                 print(f"[INFO] Saving model at {save_path}")
                 save_path = Path(save_path)
                 save_path.mkdir(parents=True, exist_ok=True)
-                save_path = str(save_path / f"{save_as}_{tag}.keras")
+                save_path = str(save_path / f"{save_as}-{tag}.keras")
                 model.save(save_path)
         except Exception as e:
                 print(f"[ERROR] model couldn't be saved at {save_path}")

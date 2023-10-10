@@ -10,6 +10,8 @@ class ConfigurationParser():
         """
             read configurations from a json file and return a namedtuple
         """
+        
+        print(f"[INFO] reading configurations from {configs_path}/{config_file}")
 
         config_path = Path(configs_path) / f'{config_file}'
         
