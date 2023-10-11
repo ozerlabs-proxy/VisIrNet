@@ -5,6 +5,7 @@ logs/tensorboard/*
 tensorboard/*
 logs/tensorboard
 models
+slurm_logs
 
 # ignore cython files
 global-exclude *.pyx
@@ -19,4 +20,4 @@ __pycache__
 
 # specific files
 
-trainingJob.sh
+# trainingJob.sh
