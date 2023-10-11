@@ -34,7 +34,7 @@ def train_step(model,
     
     assert backBone is not None, "the feature embedding backbone is not defined"
     
-    for i, batch in tqdm(enumerate(dataloader.take(8))):
+    for i, batch in tqdm(enumerate(dataloader)):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -116,7 +116,7 @@ def test_step(model,
     
     assert backBone is not None, "the feature embedding backbone is not defined"
     
-    for i, batch in enumerate(dataloader.take(8)):
+    for i, batch in enumerate(dataloader):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
