@@ -17,8 +17,8 @@ from collections import defaultdict
 
 # train step for the feature embedding backbone
 def train_step(model,
-                            dataloader,
-                            optimizer):  
+                    dataloader,
+                    optimizer):  
     
     dataloader = dataloader.shuffle(1000)   
     model.compile(optimizer=optimizer) 
@@ -32,6 +32,7 @@ def train_step(model,
             input_images = tf.expand_dims(input_images, axis=0)
             template_images  = tf.expand_dims(template_images, axis=0)
             labels = tf.expand_dims(labels, axis=0)
+            
         
         gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
         warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
