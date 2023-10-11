@@ -24,6 +24,8 @@
 #  pip install tf-geometric
  pip install tensorflow_graphics
 
+ pip install opencv-contrib-python
+
 ```
 
 
