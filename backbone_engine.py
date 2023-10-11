@@ -24,17 +24,27 @@ def train_step(model,
     model.compile(optimizer=optimizer) 
     epochs_losses_summary= defaultdict(list)
     
-    for i, batch in tqdm(enumerate(dataloader)):
+    for i, batch in tqdm(enumerate(dataloader.take(3))):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
         if len(input_images.shape) != 4:
+            
+            print(f'[unmatching shape] : {input_images.shape}')
+            print(f'[unmatching shape] : {template_images.shape}')
+            print(f'[unmatching shape] : {labels.shape}')
+            
             input_images = tf.expand_dims(input_images, axis=0)
             template_images  = tf.expand_dims(template_images, axis=0)
             labels = tf.expand_dims(labels, axis=0)
             
+        assert len(input_images.shape) == 4, "input_images shape is not (batch_size, height, width, channels)"
+        assert len(template_images.shape) == 4, "template_images shape is not (batch_size, height, width, channels)"
+        assert len(labels.shape) == 2, "labels shape is not (batch_size, uv_list/homography)"
+        
         
         gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
+        assert gt_matrix.shape == (input_images.shape[0], 3, 3), "gt_matrix shape is not (batch_size, 3, 3)"
         warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
         
         with tf.GradientTape() as tape:
@@ -68,18 +78,29 @@ def train_step(model,
     return epochs_losses_summary
 # test step for the feature embedding backbone
 def test_step(model,
-                        dataloader): 
+                dataloader): 
     epochs_losses_summary= defaultdict(list)
     for i, batch in enumerate(dataloader):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
-        if len(input_images.shape) != 4:
+        if len(input_images.shape) != 4:            
+            print(f'[unmatching shape] : {input_images.shape}')
+            print(f'[unmatching shape] : {template_images.shape}')
+            print(f'[unmatching shape] : {labels.shape}')
+            
             input_images = tf.expand_dims(input_images, axis=0)
             template_images  = tf.expand_dims(template_images, axis=0)
             labels = tf.expand_dims(labels, axis=0)
+            
+        assert len(input_images.shape) == 4, "input_images shape is not (batch_size, height, width, channels)"
+        assert len(template_images.shape) == 4, "template_images shape is not (batch_size, height, width, channels)"
+        assert len(labels.shape) == 2, "labels shape is not (batch_size, uv_list/homography)"
+        
         
         gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
+        assert gt_matrix.shape == (input_images.shape[0], 3, 3), "gt_matrix shape is not (batch_size, 3, 3)"
+        
         warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
         
         rgb_fmaps , ir_fmaps=model.call((input_images, template_images), training=False)

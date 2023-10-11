@@ -18,7 +18,11 @@ def _get_warped_sampled(images, homography_matrices, source_shape=(128,128)):
     if len(images.shape) == 3:
         images = np.expand_dims(images, axis=0)
     height_template, width_template = source_shape
+    
+    assert len(images.shape) == 4, "images shape is not (batch_size, height, width, channels)"
+    assert len(homography_matrices.shape) == 3, "homography_matrices shape is not (batch_size, 3, 3)"
     batch_size = images.shape[0]
+    assert homography_matrices.shape[0] == batch_size, "batch_size of images and homography_matrices do not match"
 
     
     _warper = Warper(batch_size,height_template=height_template,width_template=width_template)
@@ -37,8 +41,12 @@ def _transformed_images(images, homography_matrices):
     """
     if len(images.shape) == 3:
         images = np.expand_dims(images, axis=0)
-        
+    
+    assert len(images.shape) == 4, "images shape is not (batch_size, height, width, channels)"
+    assert len(homography_matrices.shape) == 3, "homography_matrices shape is not (batch_size, 3, 3)"
     batch_size = images.shape[0]
+    assert homography_matrices.shape[0] == batch_size, "batch_size of images and homography_matrices do not match"
+
     _warper = Warper(batch_size,height_template=128,width_template=128)
     warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
     
