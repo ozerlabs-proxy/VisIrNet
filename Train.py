@@ -147,19 +147,19 @@ if configs.TrainFirstStage:
     start_time = timer()
     # Train model 
 
-    model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
-                                                    train_dataloader=train_dataloader,
-                                                    test_dataloader=test_dataloader,
-                                                    dataset_name=configs.dataset,
-                                                    optimizer=optimizer,
-                                                    epochs=configs.B_NUM_EPOCHS,
-                                                    from_checkpoint=configs.B_from_checkpoint,
-                                                    save_path=configs.B_save_path,
-                                                    save_as=configs.B_save_as,
-                                                    save_frequency=configs.B_save_frequency,
-                                                    save_hard_frequency=configs.B_save_hard_frequency,
-                                                    uuid=configs.B_R_uuid
-                                                    )
+    featureEmbeddingBackBone, model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
+                                                            train_dataloader=train_dataloader,
+                                                            test_dataloader=test_dataloader,
+                                                            dataset_name=configs.dataset,
+                                                            optimizer=optimizer,
+                                                            epochs=configs.B_NUM_EPOCHS,
+                                                            from_checkpoint=configs.B_from_checkpoint,
+                                                            save_path=configs.B_save_path,
+                                                            save_as=configs.B_save_as,
+                                                            save_frequency=configs.B_save_frequency,
+                                                            save_hard_frequency=configs.B_save_hard_frequency,
+                                                            uuid=configs.B_R_uuid
+                                                            )
     # End the timer and print out how long it took
     end_time = timer()
     print(f"Total training time : {end_time-start_time:.3f} seconds\n\n")
@@ -188,21 +188,21 @@ if configs.TrainSecondStage:
     start_time = timer()
     # Train model 
 
-    model_results = engine.train_second_stage(model = regressionHead,
-                                            featureEmbeddingBackBone = configs.R_featureEmbeddingBackBone,
-                                            train_dataloader = train_dataloader,
-                                            test_dataloader = test_dataloader,
-                                            dataset_name = configs.dataset,
-                                            optimizer = optimizer,
-                                            epochs = configs.R_NUM_EPOCHS,
-                                            from_checkpoint = configs.R_from_checkpoint,
-                                            save_path = configs.R_save_path,
-                                            save_as = configs.R_save_as,
-                                            save_frequency = configs.R_save_frequency,
-                                            save_hard_frequency = configs.R_save_hard_frequency,
-                                            predicting_homography = configs.R_predicting_homography,
-                                            uuid = configs.B_R_uuid
-                                            )
+    regressionHead , model_results = engine.train_second_stage(model = regressionHead,
+                                                    featureEmbeddingBackBone = configs.R_featureEmbeddingBackBone,
+                                                    train_dataloader = train_dataloader,
+                                                    test_dataloader = test_dataloader,
+                                                    dataset_name = configs.dataset,
+                                                    optimizer = optimizer,
+                                                    epochs = configs.R_NUM_EPOCHS,
+                                                    from_checkpoint = configs.R_from_checkpoint,
+                                                    save_path = configs.R_save_path,
+                                                    save_as = configs.R_save_as,
+                                                    save_frequency = configs.R_save_frequency,
+                                                    save_hard_frequency = configs.R_save_hard_frequency,
+                                                    predicting_homography = configs.R_predicting_homography,
+                                                    uuid = configs.B_R_uuid
+                                                    )
     # End the timer and print out how long it took
     end_time = timer()
     print(f"Total training time : {end_time-start_time:.3f} seconds\n\n")

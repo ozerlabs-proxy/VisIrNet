@@ -25,7 +25,7 @@ def train_step(model,
     A train step for the regression head
     """
     
-    dataloader = dataloader.shuffle(100)   
+    dataloader = dataloader.shuffle(1000)   
         
     model.compile(optimizer=optimizer) 
     epochs_losses_summary= {"backbone": defaultdict(list),

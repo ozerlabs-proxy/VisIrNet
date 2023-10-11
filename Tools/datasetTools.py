@@ -25,7 +25,7 @@ def _get_warped_sampled(images, homography_matrices, source_shape=(128,128)):
     assert homography_matrices.shape[0] == batch_size, "batch_size of images and homography_matrices do not match"
 
     
-    _warper = Warper(batch_size,height_template=height_template,width_template=width_template)
+    _warper = Warper(batch_size = batch_size , height_template=height_template, width_template=width_template)
     warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
     warped_sampled = tf.cast(warped_sampled, tf.float32)
     

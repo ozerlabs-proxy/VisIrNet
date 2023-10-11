@@ -26,12 +26,12 @@ def train_first_stage(model: tf.keras.Model,
                     optimizer,
                     epochs=1,
                     from_checkpoint=None,
-                    save_path="models",
+                    save_path=None,
                     save_as=f"featureEmbeddingBackBone",
                     save_frequency=1,
                     save_hard_frequency=50,
                     uuid=""):
-    
+    assert save_path is not None, "save_path is None"
     # create a tag for the training
     log_tag = {
                     "model-name": model.name,
@@ -121,13 +121,13 @@ def train_second_stage(model: tf.keras.Model,
                         optimizer,
                         epochs=1,
                         from_checkpoint=None,
-                        save_path="models",
+                        save_path=None,
                         save_as=f"regressionHead",
                         save_frequency=1,
                         save_hard_frequency=50,
                         predicting_homography=False,
                         uuid=""):
-    
+    assert save_path is not None, "save_path is None"
     homography_based = "homography" if predicting_homography else "corners"
 
     # create a tag for the training
@@ -148,7 +148,7 @@ def train_second_stage(model: tf.keras.Model,
                         },
                     "training_time": 0     
                 }
-    
+    backBone = None
     #if from_checkpoint is not None load the saved model
     if from_checkpoint is not None:
         pattern = f"*regressionHead*" if str(from_checkpoint)=="latest" else f"*{from_checkpoint}*"
@@ -177,11 +177,10 @@ def train_second_stage(model: tf.keras.Model,
     _test_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
                                                     log_id=f"{dataset_name}-{str(uuid)}",
                                                     suffix="2-test")
-    
     # 3. Loop over the epochs
     for  epoch in range(epochs):
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
-        _per_epoch_train_losses = regression_head_engine.train_step(model=model,
+        model, _per_epoch_train_losses = regression_head_engine.train_step(model=model,
                                                                     backBone=backBone,
                                                                     dataloader=train_dataloader,
                                                                     optimizer=optimizer,
