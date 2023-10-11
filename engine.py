@@ -100,9 +100,15 @@ def train_first_stage(model: tf.keras.Model,
         training_time = (end_time-start_time)/3600
         log_tag["training_time"] = f"{training_time:.2f} hours"
         
-        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, epoch = epoch ,logs = _per_epoch_train_losses)
-        common_utils.tb_write_summary(_summary_writer = _test_summary_writer, epoch = epoch ,logs = _per_epoch_test_results )
-        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, epoch = epoch ,logs = {"training_time": tf.cast(training_time, tf.float32).numpy()})
+        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = _per_epoch_train_losses)
+        common_utils.tb_write_summary(_summary_writer = _test_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = _per_epoch_test_results )
+        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = {"training_time": tf.cast(training_time, tf.float32).numpy()})
 
         # 7. Save results
         common_utils.save_logs(logs=log_tag,

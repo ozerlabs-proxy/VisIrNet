@@ -99,7 +99,7 @@ def train_step(model,
     # display losses
     log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary["regression_head"].items()])
     print(f"[train_loss] : {log}")
-    return epochs_losses_summary
+    return model , epochs_losses_summary
 
 
 # test step for the regression head

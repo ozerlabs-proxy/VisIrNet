@@ -4,12 +4,12 @@
     "TrainSecondStage" : true,
     "B_R_uuid" : null,
 
-    "BATCH_SIZE" : 2,
+    "BATCH_SIZE" : 16,
     "SHUFFLE_BUFFER_SIZE" : 100,
 
     "RGB_INPUTS_SHAPE" : [192,192,3],
     "IR_INPUTS_SHAPE" :  [128,128,3],
-    "B_STACK_COUNT" : 1,
+    "B_STACK_COUNT" : 3,
     "R_STACK_COUNT" : 1,
     "OUTPUT_CHANNELS_PER_BLOCK" : 3,
 

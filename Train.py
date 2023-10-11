@@ -73,9 +73,9 @@ ConfigurationParser.printConfigurations(configs)
 # ##
 import data_setup
 
-train_dataloader,test_dataloader = data_setup.create_dataloaders(dataset=configs.dataset, 
-                                                                BATCH_SIZE=configs.BATCH_SIZE,
-                                                                SHUFFLE_BUFFER_SIZE=configs.SHUFFLE_BUFFER_SIZE
+train_dataloader,test_dataloader = data_setup.create_dataloaders(dataset = configs.dataset, 
+                                                                BATCH_SIZE = configs.BATCH_SIZE,
+                                                                SHUFFLE_BUFFER_SIZE = configs.SHUFFLE_BUFFER_SIZE
                                                                 )
 
 len(train_dataloader), len(test_dataloader)
@@ -88,15 +88,15 @@ len(train_dataloader), len(test_dataloader)
 import model_setup
 import Utils
 
-featureEmbeddingBackBone = model_setup.getFeatureEmbeddingBackBone(rgb_inputs_shape=configs.RGB_INPUTS_SHAPE,
-                                                        ir_inputs_shape=configs.IR_INPUTS_SHAPE,
-                                                        output_channels_per_block=configs.OUTPUT_CHANNELS_PER_BLOCK,
-                                                        blocks_count=configs.B_STACK_COUNT,
+featureEmbeddingBackBone = model_setup.getFeatureEmbeddingBackBone(rgb_inputs_shape = configs.RGB_INPUTS_SHAPE,
+                                                        ir_inputs_shape = configs.IR_INPUTS_SHAPE,
+                                                        output_channels_per_block = configs.OUTPUT_CHANNELS_PER_BLOCK,
+                                                        blocks_count = configs.B_STACK_COUNT,
                                                         )
 
-regressionHead= model_setup.getRegressionHead(input_shape=configs.REGRESSION_INPUT_SHAPE,
-                                                output_size=configs.REGRESSION_OUTPUT_SHAPE,
-                                                blocks_count=configs.R_STACK_COUNT,
+regressionHead= model_setup.getRegressionHead(input_shape = configs.REGRESSION_INPUT_SHAPE,
+                                                output_size = configs.REGRESSION_OUTPUT_SHAPE,
+                                                blocks_count = configs.R_STACK_COUNT,
                                                 )
 
 
@@ -133,10 +133,10 @@ if configs.TrainFirstStage:
     print("*"*25, f"first stage", "*"*25)
     print(f"uuid: {configs.B_R_uuid}")
     
-    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=configs.B_initial_learning_rate,
-                                                                    decay_steps=configs.B_decay_steps,
-                                                                    decay_rate=configs.B_decay_rate,
-                                                                    staircase=True)
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate = configs.B_initial_learning_rate,
+                                                                    decay_steps = configs.B_decay_steps,
+                                                                    decay_rate = configs.B_decay_rate,
+                                                                    staircase = True)
 
 
     # Setup optimizer
@@ -147,18 +147,18 @@ if configs.TrainFirstStage:
     start_time = timer()
     # Train model 
 
-    featureEmbeddingBackBone, model_results = engine.train_first_stage(model=featureEmbeddingBackBone,
-                                                            train_dataloader=train_dataloader,
-                                                            test_dataloader=test_dataloader,
-                                                            dataset_name=configs.dataset,
-                                                            optimizer=optimizer,
-                                                            epochs=configs.B_NUM_EPOCHS,
-                                                            from_checkpoint=configs.B_from_checkpoint,
-                                                            save_path=configs.B_save_path,
-                                                            save_as=configs.B_save_as,
-                                                            save_frequency=configs.B_save_frequency,
-                                                            save_hard_frequency=configs.B_save_hard_frequency,
-                                                            uuid=configs.B_R_uuid
+    featureEmbeddingBackBone, model_results = engine.train_first_stage(model = featureEmbeddingBackBone,
+                                                            train_dataloader = train_dataloader,
+                                                            test_dataloader = test_dataloader,
+                                                            dataset_name = configs.dataset,
+                                                            optimizer = optimizer,
+                                                            epochs = configs.B_NUM_EPOCHS,
+                                                            from_checkpoint = configs.B_from_checkpoint,
+                                                            save_path = configs.B_save_path,
+                                                            save_as = configs.B_save_as,
+                                                            save_frequency = configs.B_save_frequency,
+                                                            save_hard_frequency = configs.B_save_hard_frequency,
+                                                            uuid = configs.B_R_uuid
                                                             )
     # End the timer and print out how long it took
     end_time = timer()
@@ -174,10 +174,10 @@ if configs.TrainSecondStage:
     print("*"*25, f"second stage", "*"*25)
     print(f"uuid: {configs.B_R_uuid}")
     
-    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=configs.R_initial_learning_rate,
-                                                                    decay_steps=configs.R_decay_steps,
-                                                                    decay_rate=configs.R_decay_rate,
-                                                                    staircase=True)
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate = configs.R_initial_learning_rate,
+                                                                    decay_steps = configs.R_decay_steps,
+                                                                    decay_rate = configs.R_decay_rate,
+                                                                    staircase = True)
 
 
     # Setup optimizer
