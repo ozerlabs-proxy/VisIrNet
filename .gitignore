@@ -1,8 +1,9 @@
 data
 # logs
+tensorboard
 logs/tensorboard/*
 tensorboard/*
-logs/tensorboard/
+logs/tensorboard
 models
 
 # ignore cython files
