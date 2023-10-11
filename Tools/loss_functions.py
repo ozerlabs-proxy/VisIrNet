@@ -48,6 +48,7 @@ def combine_ssim_losses(ssim_fir_frgb,
     total_loss= ssim_frgb_Irgb + 0.5*(ssim_fir_frgb  + ssim_fir_Irgb) + margin_ir
     return total_loss
    
+    
 def get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps):
         """
         Given feature maps, and images compute losses and return them in dictionary
@@ -78,7 +79,6 @@ def get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps):
                                     "ir_Irgb": _Iir_Irgb.numpy(),
                                     "total_loss": total_loss_mse.numpy()
                                     }
-        
         
         return total_loss_mse , detailed_batch_losses
     

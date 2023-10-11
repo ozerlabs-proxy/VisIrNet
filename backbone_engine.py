@@ -44,7 +44,6 @@ def train_step(model,
         
         
         gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
-        
         assert gt_matrix.shape == (input_images.shape[0], 3, 3), "gt_matrix shape is not (batch_size, 3, 3)"
         warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
         
@@ -55,9 +54,7 @@ def train_step(model,
                 total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps)
                 # loss shouldn't be nan
                 assert not np.isnan(total_loss.numpy()), "Loss is NaN"
-        
-        
-        
+                
         all_parameters= model.trainable_variables
         grads = tape.gradient(total_loss, all_parameters)
         grads = [tf.clip_by_value(i,-0.1,0.1) for i in grads]
