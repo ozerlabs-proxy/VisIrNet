@@ -7,7 +7,7 @@ from tensorflow.keras import layers
 import numpy as np
 from pathlib import Path
 
-from tqdm.auto import tqdm    
+# from tqdm.auto import tqdm    
 
 import Tools.backboneUtils as backboneUtils
 import Tools.loss_functions as loss_functions

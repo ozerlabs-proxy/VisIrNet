@@ -4,7 +4,7 @@ from tensorflow.keras import layers
 import numpy as np
 from pathlib import Path
 
-from tqdm.auto import tqdm    
+# from tqdm.auto import tqdm    
 
 import Tools.backboneUtils as backboneUtils
 import Tools.loss_functions as loss_functions
@@ -34,7 +34,7 @@ def train_step(model,
     
     assert backBone is not None, "the feature embedding backbone is not defined"
     
-    for i, batch in tqdm(enumerate(dataloader)):
+    for i, batch in enumerate(dataloader):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
