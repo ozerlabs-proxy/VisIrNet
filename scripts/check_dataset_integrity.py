@@ -44,11 +44,13 @@ dataset="SkyData"
 BATCH_SIZE = 1
 SHUFFLE_BUFFER_SIZE = 100
 
+
 # for dataset in ["MSCOCO"]:
 for dataset in ["MSCOCO","VEDAI","SkyData","GoogleEarth","GoogleMap"]:
 
     print("**dataset: ", dataset)
     train_dataloader, test_dataloader = data_setup.create_dataloaders(dataset=dataset, 
+
                                                                     BATCH_SIZE=BATCH_SIZE,
                                                                     SHUFFLE_BUFFER_SIZE=100
                                                                     )
@@ -88,8 +90,9 @@ for dataset in ["MSCOCO","VEDAI","SkyData","GoogleEarth","GoogleMap"]:
             input_images, template_images, labels ,_instances = batch
             
             # check for different shapes
-            dataset_info[split]["seen_shapes_inputs"].add(str(input_images.shape))
-            dataset_info[split]["seen_shapes_templates"].add(str(template_images.shape))
+            dataset_info[split]["seen_shapes_inputs"].add(str(list(input_images.shape)))
+            dataset_info[split]["seen_shapes_templates"].add(str(list(template_images.shape)))
+
             
             # check for nans
             if np.isnan(input_images).any() or np.isnan(template_images).any():
@@ -102,6 +105,7 @@ for dataset in ["MSCOCO","VEDAI","SkyData","GoogleEarth","GoogleMap"]:
             if not _is_invertibles:
                 dataset_info[split]["nonInvertibles"].append(str(_instances.numpy()[0]))
                 
+
             try:
                 warped_images, _transformed_have_nans = DatasetTools._transformed_images(input_images,homography_matrices)
             except:
@@ -139,7 +143,7 @@ for dataset in ["MSCOCO","VEDAI","SkyData","GoogleEarth","GoogleMap"]:
         
         dataset_info[split]["seen_shapes_inputs"] = list(dataset_info[split]["seen_shapes_inputs"] )
         dataset_info[split]["seen_shapes_templates"] = list(dataset_info[split]["seen_shapes_templates"])    
-        
+
     #save dataset info
     common_utils.save_json(dataset_info, 
                             f"resources/datasets_logs/",
