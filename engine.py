@@ -103,11 +103,11 @@ def train_first_stage(model: tf.keras.Model,
         common_utils.tb_write_summary(_summary_writer = _train_summary_writer, 
                                         epoch = epoch ,
                                         logs = _per_epoch_train_losses)
-        
+
         common_utils.tb_write_summary(_summary_writer = _test_summary_writer, 
                                         epoch = epoch ,
                                         logs = _per_epoch_test_results )
-        
+
         common_utils.tb_write_summary(_summary_writer = _train_summary_writer, 
                                         epoch = epoch ,
                                         logs = {"training_time": tf.cast(training_time, tf.float32).numpy()})
