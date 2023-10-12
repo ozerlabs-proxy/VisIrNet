@@ -18,8 +18,8 @@ from Tools._Datasets import *
 
 def create_dataloaders(
                     dataset: str="SkyData", 
-                    BATCH_SIZE: int=1,
-                    SHUFFLE_BUFFER_SIZE: int=100
+                    BATCH_SIZE = None,
+                    SHUFFLE_BUFFER_SIZE=None
                     ):
     """_summary_
 
@@ -31,11 +31,25 @@ def create_dataloaders(
     Returns:
         train_dataloader, test_dataloader
     """
-
-    train_dataset = Dataset(dataset=dataset,split="train").dataset
-    test_dataset = Dataset(dataset=dataset,split="val").dataset
     
-    train_dataloader= train_dataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE,drop_remainder=True)
+
+    assert dataset in ["SkyData", "VEDAI","GoogleEarth","GoogleMap","MSCOCO"] , "dataset not supported"
+    assert BATCH_SIZE is not None, "BATCH_SIZE is not defined"
+    assert SHUFFLE_BUFFER_SIZE is not None, "SHUFFLE_BUFFER_SIZE is not defined"
+    
+    
+    train_dataset = Dataset(dataset = dataset,
+                                split="train").dataset
+    test_dataset = Dataset(dataset = dataset,
+                            split="val").dataset
+    
+    train_dataloader= train_dataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
     test_dataloader = test_dataset.batch(BATCH_SIZE)
+    
+    print(f"dataset: {dataset}")
+    print(f"BATCH_SIZE: {BATCH_SIZE}")
+    print(f"SHUFFLE_BUFFER_SIZE: {SHUFFLE_BUFFER_SIZE}")
+    print(f"train_dataloader: {len(train_dataloader)}")
+    print(f"test_dataloader: {len(test_dataloader)}")
 
     return train_dataloader, test_dataloader

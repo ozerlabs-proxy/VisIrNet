@@ -11,21 +11,27 @@ from Tools.warper import Warper
 
 
 
-def _get_warped_sampled(images, homography_matrices, source_shape=(128,128)):
+def _get_warped_sampled(images, 
+                        homography_matrices):
     """
         check if the transformed images have nans
     """
-    if len(images.shape) == 3:
-        images = np.expand_dims(images, axis=0)
-    height_template, width_template = source_shape
+    if len(images.shape) != 4:
+        print(f'[unmatching shape] : {images.shape}')
+        print(f'[unmatching shape] : {homography_matrices.shape}')
+        print(f'[unmatching shape]  attempting to expand dims with numpy')
+        
+        images = images[tf.newaxis,...]
+        homography_matrices = homography_matrices[tf.newaxis,...]
+        
+    batch_size = images.shape[0]
     
     assert len(images.shape) == 4, "images shape is not (batch_size, height, width, channels)"
     assert len(homography_matrices.shape) == 3, "homography_matrices shape is not (batch_size, 3, 3)"
-    batch_size = images.shape[0]
     assert homography_matrices.shape[0] == batch_size, "batch_size of images and homography_matrices do not match"
 
-    
-    _warper = Warper(batch_size = batch_size , height_template=height_template, width_template=width_template)
+    _warper = Warper( batch_size , 128 , 128 )
+
     warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
     warped_sampled = tf.cast(warped_sampled, tf.float32)
     

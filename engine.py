@@ -7,7 +7,7 @@ from tensorflow.keras import layers
 import numpy as np
 from pathlib import Path
 
-# from tqdm.auto import tqdm    
+from tqdm.auto import tqdm    
 
 import Tools.backboneUtils as backboneUtils
 import Tools.loss_functions as loss_functions
@@ -73,20 +73,20 @@ def train_first_stage(model: tf.keras.Model,
     # 4. Loop over the epochs
     for  epoch in range(epochs):
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
-        _per_epoch_train_losses = backbone_engine.train_step(model=model,
-                                                dataloader=train_dataloader,
-                                                optimizer=optimizer)
+        model , _per_epoch_train_losses = backbone_engine.train_step(model = model,
+                                                                        dataloader = train_dataloader,
+                                                                        optimizer = optimizer)
         
         
         _per_epoch_test_results = backbone_engine.test_step(model=model,
-                                                    dataloader=test_dataloader)
+                                                            dataloader=test_dataloader)
         # 6. Save model
         if (epoch+1) % save_frequency == 0:
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)
-            common_utils.save_model_weights(model=model,
-                                            save_path=save_path,
-                                            save_as=f'{save_as}-{uuid}',
-                                            tag=str(hard_tag))
+            common_utils.save_model_weights(model = model,
+                                            save_path = save_path,
+                                            save_as = f'{save_as}-{uuid}',
+                                            tag = str(hard_tag))
             
     
         # could be functionalized
@@ -100,16 +100,24 @@ def train_first_stage(model: tf.keras.Model,
         training_time = (end_time-start_time)/3600
         log_tag["training_time"] = f"{training_time:.2f} hours"
         
-        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, epoch = epoch ,logs = _per_epoch_train_losses)
-        common_utils.tb_write_summary(_summary_writer = _test_summary_writer, epoch = epoch ,logs = _per_epoch_test_results )
-        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, epoch = epoch ,logs = {"training_time": tf.cast(training_time, tf.float32).numpy()})
+        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = _per_epoch_train_losses)
+        
+        common_utils.tb_write_summary(_summary_writer = _test_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = _per_epoch_test_results )
+        
+        common_utils.tb_write_summary(_summary_writer = _train_summary_writer, 
+                                        epoch = epoch ,
+                                        logs = {"training_time": tf.cast(training_time, tf.float32).numpy()})
 
         # 7. Save results
         common_utils.save_logs(logs=log_tag,
                                 save_path=f"logs/{dataset_name}",
                                 save_as=f"{log_tag['tag_name']}.json")
                                 
-    return log_tag["per_epoch_metrics"] 
+    return model, log_tag["per_epoch_metrics"] 
 
 """ train second stage (regression head)"""
 
