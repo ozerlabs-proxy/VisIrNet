@@ -4,7 +4,7 @@ from tensorflow.keras import layers
 import numpy as np
 from pathlib import Path
 
-# from tqdm.auto import tqdm    
+from tqdm.auto import tqdm    
 
 import Tools.backboneUtils as backboneUtils
 import Tools.loss_functions as loss_functions
@@ -20,11 +20,12 @@ def train_step(model,
                     dataloader,
                     optimizer):  
     
-    dataloader = dataloader.shuffle(100)   
+    dataloader = dataloader.shuffle(1000)   
     model.compile(optimizer=optimizer) 
     epochs_losses_summary= defaultdict(list)
     
-    for i, batch in enumerate(dataloader):
+    print(f"[INFO] training  on {len(dataloader)} pairs")
+    for i, batch in tqdm(enumerate(dataloader)):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -34,24 +35,36 @@ def train_step(model,
             print(f'[unmatching shape] : {template_images.shape}')
             print(f'[unmatching shape] : {labels.shape}')
             
-            input_images = tf.expand_dims(input_images, axis=0)
-            template_images  = tf.expand_dims(template_images, axis=0)
-            labels = tf.expand_dims(labels, axis=0)
+            input_images = tf.expand_dims(input_images, axis=0) if len(input_images.shape) == 3 else input_images
+            template_images  = tf.expand_dims(template_images, axis=0) if len(template_images.shape) == 3 else template_images
+            labels = tf.expand_dims(labels, axis=0) if len(labels.shape) == 1 else labels
             
+
+        
+        gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
+        warped_inputs, _ = DatasetTools._get_warped_sampled(images = input_images, 
+                                                            homography_matrices = gt_matrix)
+        
         assert len(input_images.shape) == 4, "input_images shape is not (batch_size, height, width, channels)"
         assert len(template_images.shape) == 4, "template_images shape is not (batch_size, height, width, channels)"
         assert len(labels.shape) == 2, "labels shape is not (batch_size, uv_list/homography)"
-        
-        
-        gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
         assert gt_matrix.shape == (input_images.shape[0], 3, 3), "gt_matrix shape is not (batch_size, 3, 3)"
-        warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
+        assert len(warped_inputs.shape) == len(input_images.shape), "warped_inputs shape is not (batch_size, height, width, channels)"
         
         with tf.GradientTape() as tape:
-                rgb_fmaps , ir_fmaps=model.call((input_images, template_images),training=True)
-                warped_fmaps,_ = DatasetTools._get_warped_sampled(rgb_fmaps, gt_matrix)
+                rgb_fmaps , ir_fmaps = model.call((input_images, template_images),training=True)
+                
+                
+                assert rgb_fmaps.shape == (input_images.shape[0], 192, 192, 3), f"rgb_fmaps shape is not {rgb_fmaps.shape}"
+                assert ir_fmaps.shape == (input_images.shape[0], 128, 128, 3), f"ir_fmaps shape is not {ir_fmaps.shape}"
+                
+                warped_fmaps,_ = DatasetTools._get_warped_sampled( images = rgb_fmaps, 
+                                                                    homography_matrices = gt_matrix)
                                 
-                total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps)
+                total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,
+                                                                                            template_images,
+                                                                                            warped_fmaps,
+                                                                                            ir_fmaps)
                 # loss shouldn't be nan
                 assert not np.isnan(total_loss.numpy()), "Loss is NaN"
                 
@@ -75,11 +88,16 @@ def train_step(model,
     # display losses
     log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary.items()])
     print(f"[train_loss] : {log}")
-    return epochs_losses_summary
+    return model, epochs_losses_summary
+
+
+
 # test step for the feature embedding backbone
 def test_step(model,
                 dataloader): 
+    
     epochs_losses_summary= defaultdict(list)
+    print(f"[INFO] training  on {len(dataloader)} pairs")
     for i, batch in enumerate(dataloader):
         input_images, template_images, labels,_instances = batch
         
@@ -101,13 +119,18 @@ def test_step(model,
         gt_matrix=DatasetTools.get_ground_truth_homographies(labels)
         assert gt_matrix.shape == (input_images.shape[0], 3, 3), "gt_matrix shape is not (batch_size, 3, 3)"
         
-        warped_inputs, _ = DatasetTools._get_warped_sampled(input_images, gt_matrix)
+        warped_inputs, _ = DatasetTools._get_warped_sampled(images = input_images, 
+                                                            homography_matrices = gt_matrix)
         
-        rgb_fmaps , ir_fmaps=model.call((input_images, template_images), training=False)
-        warped_fmaps,_ = DatasetTools._get_warped_sampled(rgb_fmaps, gt_matrix)
+        rgb_fmaps , ir_fmaps = model.call((input_images, template_images), training=False)
+        warped_fmaps, _  = DatasetTools._get_warped_sampled(images = rgb_fmaps, 
+                                                            homography_matrices = gt_matrix)
         
-        total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps)
-        
+        total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,
+                                                                                    template_images,
+                                                                                    warped_fmaps,
+                                                                                    ir_fmaps)
+            
         # loss shouldn't be nan
         assert not np.isnan(total_loss.numpy()), "Loss is NaN"
         

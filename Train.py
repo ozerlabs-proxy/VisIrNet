@@ -73,12 +73,13 @@ ConfigurationParser.printConfigurations(configs)
 # ##
 import data_setup
 
-train_dataloader,test_dataloader = data_setup.create_dataloaders(dataset = configs.dataset, 
+train_dataloader, test_dataloader = data_setup.create_dataloaders(dataset = configs.dataset, 
                                                                 BATCH_SIZE = configs.BATCH_SIZE,
                                                                 SHUFFLE_BUFFER_SIZE = configs.SHUFFLE_BUFFER_SIZE
                                                                 )
 
-len(train_dataloader), len(test_dataloader)
+
+print(f"{len(train_dataloader)} , {len(test_dataloader)}")
 #
 
 # ## [markdown]

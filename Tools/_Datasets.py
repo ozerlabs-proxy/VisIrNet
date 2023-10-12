@@ -14,8 +14,7 @@ class Dataset():
         self.dataset = tf.data.Dataset.list_files(str(self.INPUTS_DIR / "*.*"))
         print(f"[INFO] {split} _dataset: ", len(self.dataset))
         self.dataset = self.dataset.map(lambda x: tf.py_function(self._preprocess_instance, 
-                                                        [x],
-                                                            [tf.float32, tf.float32, tf.float32, tf.string]))
+                                                        [x], [tf.float32, tf.float32, tf.float32, tf.string]))
         
         
     def set_paths(self, dataset, split):
@@ -51,6 +50,7 @@ class Dataset():
         image = PIL.Image.open(image_path)
         image = tf.convert_to_tensor(np.array(image), dtype=tf.float32)
         image = image / 255.0
+        assert len(image.shape) == 3, f"image shape is not (height, width, channels)"   
         image = image[:,:,:3]
         
         return image
@@ -86,6 +86,7 @@ class Dataset():
         v_list = np.array(v_list)
         
         label = tf. convert_to_tensor(np.concatenate([u_list, v_list]), dtype=tf.float32)
+        assert len(label.shape) == 1, f"label shape is not (uv_list)" 
         
         return label
 
