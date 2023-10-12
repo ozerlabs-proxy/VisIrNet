@@ -48,10 +48,35 @@ class Dataset():
             np.array: image as a numpy array
         """
         image = PIL.Image.open(image_path)
-        image = tf.convert_to_tensor(np.array(image), dtype=tf.float32)
-        image = image / 255.0
-        assert len(image.shape) == 3, f"image shape is not (height, width, channels)"   
-        image = image[:,:,:3]
+        image = np.array(image)       
+        
+        if len(image.shape) < 2:
+            raise ValueError("image has less than two dimensions")
+
+        elif len(image.shape) == 2:
+            # print("image is grayscale")
+            # convert grayscale to RGB
+            image = PIL.Image.fromarray(image)
+            image = image.convert('RGB')
+            # image = tf.image.grayscale_to_rgb(image)
+            image = np.array(image)
+            # print("new image.shape: ", image.shape)
+            
+        elif image.shape[2] > 3:
+            # print("image is RGBA")
+            # convert RGBA to RGB
+            image = PIL.Image.fromarray(image, 'RGBA').convert('RGB')
+            image = np.array(image)
+            
+            # print("new image.shape: ", image.shape)
+
+        assert len(image.shape) == 3, "image is not RGB"
+        assert image.shape[2] == 3, "image is not RGB"
+        
+        image = tf.convert_to_tensor(image, dtype=tf.float32)
+        image = image / np.float32(255.0)
+        
+        assert len(image.shape) == 3, f"image shape is not (H,W,C) but {image.shape}"
         
         return image
 
@@ -114,7 +139,12 @@ class Dataset():
         label = self._parse_label(label_path)
         
         
-
+        # 
+        assert input_image.shape == (192,192,3), f"input_image.shape is not (192,192,3) but {input_image.shape}"
+        assert template_image.shape == (128,128,3), f"template_image.shape is not (192,192,3) but {template_image.shape}"
+        assert label.shape == (8,), f"label.shape is not (8,) but {label.shape}"
+        assert _instance == _instance_path.stem, f"_instance is not {_instance_path.stem} but {_instance}"
+        
         _instance = tf.strings.as_string(str(_instance))
         
         return input_image, template_image, label ,_instance
