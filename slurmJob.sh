@@ -35,7 +35,14 @@ conda activate VisIrNet
 
 ##srun nvidia-smi
 
-echo "--**Training**--"
-# srun python Train.py --config-file skydata_default_config.json
-# srun python3 Train.py --config-file vedai_default_config.json
-srun nvidia-smi && python3 Train.py --config-file googlemap_default_config.json 
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TRAINING iNTEGRITY>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>#
+
+# echo "--**Training**--"
+# # srun python Train.py --config-file skydata_default_config.json
+# # srun python3 Train.py --config-file vedai_default_config.json
+# # srun nvidia-smi && python3 Train.py --config-file googlemap_default_config.json 
+
+
+
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<DATASETS iNTEGRITY>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>#
+srun python scripts/check_dataset_integrity.py 
