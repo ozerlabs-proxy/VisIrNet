@@ -1,10 +1,10 @@
 {
-    "dataset" : "SkyData",
+    "dataset" : "GoogleMap",
     "TrainFirstStage" : true,
     "TrainSecondStage" : true,
     "B_R_uuid" : null,
 
-    "BATCH_SIZE" : 1,
+    "BATCH_SIZE" : 8,
     "SHUFFLE_BUFFER_SIZE" : 1000,
 
     "RGB_INPUTS_SHAPE" : [192,192,3],
@@ -37,6 +37,4 @@
     "R_save_frequency"  :  1,
     "R_save_hard_frequency" : 10,
     "R_predicting_homography" : true
-
-
 }

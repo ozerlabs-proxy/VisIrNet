@@ -11,7 +11,7 @@ import Tools.loss_functions as loss_functions
 import Tools.datasetTools as DatasetTools
 import Tools.utilities as common_utils
 from collections import defaultdict
-
+tf.keras.mixed_precision.set_global_policy('mixed_float16')
 
 
 
@@ -27,7 +27,7 @@ def train_step(model,
     
     dataloader = dataloader.shuffle(1000)   
         
-    model.compile(optimizer=optimizer) 
+    model.compile(optimizer=optimizer,experimental_run_tf_function=False) 
     epochs_losses_summary= {"backbone": defaultdict(list),
                             "regression_head": defaultdict(list)
                             }

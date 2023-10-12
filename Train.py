@@ -9,6 +9,8 @@ import PIL
 import PIL.Image
 import json
 
+tf.keras.mixed_precision.set_global_policy('mixed_float16')
+
 #change working directory to root
 ROOT_DIR = os.getcwd()
 while os.path.basename(ROOT_DIR) != 'VisIrNet':
@@ -149,7 +151,7 @@ if configs.TrainFirstStage:
     # Train model 
 
     featureEmbeddingBackBone, model_results = engine.train_first_stage(model = featureEmbeddingBackBone,
-                                                            train_dataloader = train_dataloader,
+                                                            train_dataloader = test_dataloader,
                                                             test_dataloader = test_dataloader,
                                                             dataset_name = configs.dataset,
                                                             optimizer = optimizer,
