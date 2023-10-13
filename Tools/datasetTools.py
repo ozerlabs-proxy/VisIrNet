@@ -35,7 +35,9 @@ def _get_warped_sampled(images,
     warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
     warped_sampled = tf.cast(warped_sampled, tf.float32)
     
-    _transformed_images_have_nans = tf.math.is_nan(warped_sampled).numpy().any()  
+    _transformed_images_have_nans = not np.isfinite(warped_sampled).all()  
+    
+    assert not _transformed_images_have_nans, "<<<<<<<<<<<<<<<<transformed images have nans >>>>>>>>" 
     
     return warped_sampled, _transformed_images_have_nans  
 
@@ -56,7 +58,7 @@ def _transformed_images(images, homography_matrices):
     _warper = Warper(batch_size,height_template=128,width_template=128)
     warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
     
-    _transformed_images_have_nans =tf.math.is_nan(warped_sampled).numpy().any()  
+    _transformed_images_have_nans = np.isfinite(warped_sampled).all()  
     
     return warped_sampled, _transformed_images_have_nans  
 
@@ -117,7 +119,7 @@ def get_ground_truth_homographies(u_v_list):
     dividend = tf.expand_dims(dividend, axis=-1)
     dividend = tf.expand_dims(dividend, axis=-1)
     homography_matrices = tf.divide(homography_matrices,dividend)
-    assert not tf.math.is_nan(homography_matrices).numpy().any(), "homography matrices have nan values"
+    assert np.isfinite(homography_matrices).all(), "homography matrices have nan values"
     return homography_matrices
 
 def get_inverse_homographies(homography_matrices):
@@ -138,7 +140,7 @@ def is_invertible(homography_matrices):
         get inverses and check if they are invertible
     """
     inverse_matrices = get_inverse_homographies(homography_matrices)
-    invertible = not tf.math.is_nan(inverse_matrices).numpy().any()
+    invertible = np.isfinite(inverse_matrices).all()
     
     return inverse_matrices, invertible
 
@@ -220,5 +222,5 @@ def corners_to_homographies(prediction_corners):
     dividend = tf.expand_dims(dividend, axis=-1)
     dividend = tf.expand_dims(dividend, axis=-1)
     homography_matrices = tf.divide(homography_matrices,dividend)
-    assert not tf.math.is_nan(homography_matrices).numpy().any(), "homography matrices have nan values"
+    assert np.isfinite(homography_matrices).all(), "homography matrices have nan values"
     return homography_matrices

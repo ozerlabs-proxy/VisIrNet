@@ -9,7 +9,7 @@ import PIL
 import PIL.Image
 import json
 
-tf.keras.mixed_precision.set_global_policy('mixed_float16')
+# tf.keras.mixed_precision.set_global_policy('mixed_float16')
 
 #change working directory to root
 ROOT_DIR = os.getcwd()
@@ -25,6 +25,7 @@ devices = tf.config.list_physical_devices('GPU')
 print("len(devices): ", len(devices))
 print(f"available GPUs: {devices}");
 
+
 ## tf 
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
@@ -38,6 +39,8 @@ if gpus:
     # Memory growth must be set before GPUs have been initialized
     print(e)
 ###
+
+
 
 
 

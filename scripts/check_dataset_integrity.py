@@ -46,7 +46,7 @@ SHUFFLE_BUFFER_SIZE = 100
 
 
 # for dataset in ["MSCOCO"]:
-for dataset in ["MSCOCO","VEDAI","SkyData","GoogleEarth","GoogleMap"]:
+for dataset in ["VEDAI","SkyData","GoogleEarth","GoogleMap","MSCOCO"]:
 
     print("**dataset: ", dataset)
     train_dataloader, test_dataloader = data_setup.create_dataloaders(dataset=dataset, 
@@ -95,7 +95,7 @@ for dataset in ["MSCOCO","VEDAI","SkyData","GoogleEarth","GoogleMap"]:
 
             
             # check for nans
-            if np.isnan(input_images).any() or np.isnan(template_images).any():
+            if not np.isfinite(input_images).all() or  not np.isfinite(template_images).all():
                 dataset_info[split]["NaNs"].append(str(_instances.numpy()[0]))
                 
             homography_matrices = DatasetTools.get_ground_truth_homographies(labels) 
@@ -129,11 +129,12 @@ for dataset in ["MSCOCO","VEDAI","SkyData","GoogleEarth","GoogleMap"]:
                 
                 # now do they have nans
                 print("*"*50 + " nans " + "*"*50)
-                print(f"np.isnan(input_images).any(): {np.isnan(input_images).any()}")
-                print(f"np.isnan(template_images).any(): {np.isnan(template_images).any()}")
-                print(f"np.isnan(labels).any(): {np.isnan(labels).any()}")
-                print(f"np.isnan(homography_matrices).any(): {np.isnan(homography_matrices).any()}")
-                print(f"np.isnan(inverse_homography_matrices).any(): {np.isnan(inverse_homography_matrices).any()}")
+                print(f"np.isfinite(input_images).all(): {np.isfinite(input_images).all()}")
+                print(f"np.isfinite(template_images).all(): {np.isfinite(template_images).all()}")
+                print(f"np.isfinite(labels).all(): {np.isfinite(labels).all()}")
+                print(f"np.isfinite(homography_matrices).all(): {np.isfinite(homography_matrices).all()}")
+                print(f"np.isfinite(inverse_homography_matrices).all(): {np.isfinite(inverse_homography_matrices).all()}")
+                
                 
                 continue                
             
