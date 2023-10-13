@@ -49,7 +49,7 @@ class Warper():
   def meshgrid_after(self,coords, matrix):
     coords=tf.tensordot(matrix,coords,axes = 1)
    
-    coords=coords/(coords[:,2:,:,:]+np.finfo(float).eps)
+    coords=tf.cast(coords,tf.float32) /(coords[:,2:,:,:]+np.finfo(float).eps)
     coords=coords[:,:2,:,:]
     
     coords=tf.transpose(coords,[0,2,3,1])

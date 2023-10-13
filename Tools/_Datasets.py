@@ -138,12 +138,20 @@ class Dataset():
         template_image = self._get_image(template_path)
         label = self._parse_label(label_path)
         
+
+        
         
         # 
         assert input_image.shape == (192,192,3), f"input_image.shape is not (192,192,3) but {input_image.shape}"
         assert template_image.shape == (128,128,3), f"template_image.shape is not (192,192,3) but {template_image.shape}"
         assert label.shape == (8,), f"label.shape is not (8,) but {label.shape}"
         assert _instance == _instance_path.stem, f"_instance is not {_instance_path.stem} but {_instance}"
+        
+        # assert all are contain finate values
+        assert np.isfinite(input_image).all() , f"input_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
+        assert np.isfinite(template_image).all() , f"template_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
+        assert np.isfinite(label).all() , f"label contain non finite values {label} ----- {tf.strings.as_string(str(_instance))}"
+        
         
         _instance = tf.strings.as_string(str(_instance))
         

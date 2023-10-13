@@ -2,6 +2,7 @@ import tensorflow as tf
 import Tools.backboneUtils as BackBoneUtils
 import Tools.utilities as common_utils
 import Tools.datasetTools as DatasetTools
+import numpy as np
 
 
 def compute_similarity_differences_mse(img_1, img_2):
@@ -17,7 +18,7 @@ def compute_similarity_differences_mse(img_1, img_2):
     # print(f":[DEBUGGING] img_2 shape {img_2.shape}")
     
     
-    fmaps_have_nans = common_utils.tensor_has_nan(img_2) or common_utils.tensor_has_nan(img_1) 
+    # fmaps_have_nans = common_utils.tensor_has_nan(img_2) or common_utils.tensor_has_nan(img_1) 
     assert (len(img_1.shape)==4 and len(img_2.shape)==4 ), "[ERROR] images must have 4 dimensions"
     assert not common_utils.tensor_has_nan(img_1) , "[ERROR] images must not have nans"
     assert not common_utils.tensor_has_nan(img_2) , "[ERROR] images must not have nans"
@@ -63,6 +64,18 @@ def get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps):
         _fir_Irgb  = compute_similarity_differences_mse(ir_fmaps,warped_inputs)#should be minimal
         _frgb_Iir  = compute_similarity_differences_mse(warped_fmaps,template_images)#
         _Iir_Irgb  = compute_similarity_differences_mse(template_images,warped_inputs)
+        
+        
+        ################### experime ntal ###################
+        
+        # _fir_frgb  = compute_similarity_differences_mse(template_images, warped_fmaps)#should be minimal
+        # _fir_Iir   = compute_similarity_differences_mse(ir_fmaps,template_images)
+        # _frgb_Irgb = compute_similarity_differences_mse(warped_fmaps,warped_inputs)#should be minimal
+        # _fir_Irgb  = compute_similarity_differences_mse(ir_fmaps,warped_inputs)#should be minimal
+        # _frgb_Iir  = compute_similarity_differences_mse(warped_fmaps,template_images)#
+        # _Iir_Irgb  = compute_similarity_differences_mse(template_images,warped_inputs)
+        
+        ################### experime ntal ###################
         
         losses_weights = [1,.001,1,1,.0000001,.0000001]
         losses = [_fir_frgb, _fir_Iir, _frgb_Irgb, _fir_Irgb, _frgb_Iir, _Iir_Irgb]
@@ -114,10 +127,10 @@ def get_losses_regression_head( predictions,
         prediction_matrices = DatasetTools.corners_to_homographies(prediction_corners)
     
     # assertions
-    assert tf.math.is_nan(prediction_matrices).numpy().any() == False, "[ERROR] prediction_matrices has nans"
-    assert tf.math.is_nan(prediction_corners).numpy().any() == False, "[ERROR] prediction_corners has nans"
-    assert tf.math.is_nan(gt_matrix).numpy().any() == False, "[ERROR] gt_matrix has nans"
-    assert tf.math.is_nan(ground_truth_corners).numpy().any() == False, "[ERROR] ground_truth_corners has nans"
+    assert np.isfinite(prediction_matrices).all() , "[ERROR] prediction_matrices has nans"
+    assert np.isfinite(prediction_corners).all() , "[ERROR] prediction_corners has nans"
+    assert np.isfinite(gt_matrix).all() , "[ERROR] gt_matrix has nans"
+    assert np.isfinite(ground_truth_corners).all() , "[ERROR] ground_truth_corners has nans"
     
 
     
