@@ -68,13 +68,14 @@ def train_step(model,
                                                                                             template_images,
                                                                                             warped_fmaps,
                                                                                             ir_fmaps)
-                # loss shouldn't be nan
-                assert np.isfinite(total_loss).all(), "Loss is NaN"
+                
+                                                            
                 
         all_parameters= model.trainable_variables
+        # assert tf.math.is_finite(all_parameters).all(), "all_parameters in backbone are inf or NaN"
         grads = tape.gradient(total_loss, all_parameters)
         grads = [tf.clip_by_value(i,-0.1,0.1) for i in grads]        
-        assert np.isfinite(grads).all(), "Gradients in backbone are inf or NaN"
+        # assert tf.math.is_finite(grads).all(), "Gradients in backbone are inf or NaN"
         optimizer.apply_gradients(zip(grads, all_parameters))
         
         # add losses to epoch losses

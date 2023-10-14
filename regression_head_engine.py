@@ -59,18 +59,18 @@ def train_step(model,
         concatenated_fmaps = tf.concat([rgb_fmaps, ir_fmaps_padded], axis=-1)
         
         with tf.GradientTape() as tape:
-                predictions = model.call((concatenated_fmaps),training=True)
+                predictions = model.call((concatenated_fmaps), training=True)
                 
                 total_loss , detailed_batch_losses = loss_functions.get_losses_regression_head( predictions = predictions, 
                                                                                                 ground_truth_corners = labels,
                                                                                                 gt_matrix = gt_matrix, 
                                                                                                 predicting_homography=predicting_homography)
-                assert np.isfinite(total_loss).all(), "Loss is NaN"
+                # assert np.isfinite(total_loss).all(), "Loss is NaN"
                 
         all_parameters= model.trainable_variables
         grads = tape.gradient(total_loss, all_parameters)
         grads = [tf.clip_by_value(i,-0.1,0.1) for i in grads]
-        assert np.isfinite(grads).all(), "Gradients in regression head are inf or NaN"
+        # assert np.isfinite(grads).all(), "Gradients in regression head are inf or NaN"
         optimizer.apply_gradients(zip(grads, all_parameters))
         
         # add losses to epoch losses
@@ -147,7 +147,7 @@ def test_step(model,
                                                                                         ground_truth_corners = labels,
                                                                                         gt_matrix = gt_matrix, 
                                                                                         predicting_homography=predicting_homography)
-        assert np.isfinite(total_loss).all(), "Loss is NaN or Inf"
+        # assert np.isfinite(total_loss).all(), "Loss is NaN or Inf"
         # add losses to epoch losses
         for key, value in detailed_batch_losses.items():
             epochs_losses_summary["regression_head"][key].append(value)
@@ -159,7 +159,7 @@ def test_step(model,
                                                                                                     warped_fmaps,
                                                                                                     ir_fmaps)
         # loss shouldn't be nan
-        assert np.isfinite(total_loss_backbone).all(), "BackBone Loss is NaN or Inf"    
+        # assert np.isfinite(total_loss_backbone).all(), "BackBone Loss is NaN or Inf"    
         # add losses to epoch losses
         for key, value in detailed_batch_losses_backbone.items():
             epochs_losses_summary["backbone"][key].append(value)

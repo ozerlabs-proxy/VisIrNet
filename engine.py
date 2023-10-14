@@ -242,4 +242,4 @@ def train_second_stage(model: tf.keras.Model,
                                 save_path=f"logs/{dataset_name}",
                                 save_as=f"{log_tag['tag_name']}.json")
                                 
-    return log_tag["per_epoch_metrics"] 
+    return model, log_tag["per_epoch_metrics"] 
