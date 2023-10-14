@@ -9,7 +9,9 @@ import PIL
 import PIL.Image
 import json
 
-# tf.keras.mixed_precision.set_global_policy('mixed_float16')
+# tf.keras.mixed_precision.set_global_policy('float64')
+tf.keras.backend.set_floatx('float64')
+print(f"[INFO] using {tf.keras.backend.floatx()} as default float type")
 
 #change working directory to root
 ROOT_DIR = os.getcwd()
@@ -154,7 +156,7 @@ if configs.TrainFirstStage:
     # Train model 
 
     featureEmbeddingBackBone, model_results = engine.train_first_stage(model = featureEmbeddingBackBone,
-                                                            train_dataloader = test_dataloader,
+                                                            train_dataloader = train_dataloader,
                                                             test_dataloader = test_dataloader,
                                                             dataset_name = configs.dataset,
                                                             optimizer = optimizer,

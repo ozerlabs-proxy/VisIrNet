@@ -58,7 +58,7 @@ def _transformed_images(images, homography_matrices):
     _warper = Warper(batch_size,height_template=128,width_template=128)
     warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
     
-    _transformed_images_have_nans = np.isfinite(warped_sampled).all()  
+    _transformed_images_have_nans = not np.isfinite(warped_sampled).all()  
     
     return warped_sampled, _transformed_images_have_nans  
 

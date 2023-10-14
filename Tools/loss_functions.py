@@ -26,6 +26,8 @@ def compute_similarity_differences_mse(img_1, img_2):
     
     img_1 = BackBoneUtils.get_fmaps_in_suitable_shape(img_1)
     img_2 = BackBoneUtils.get_fmaps_in_suitable_shape(img_2)
+    before_loss_nans = common_utils.tensor_has_nan(img_2) or common_utils.tensor_has_nan(img_1)
+    assert not before_loss_nans , "[ERROR] loss cant be computed on  nans"
     
     img_1 = BackBoneUtils.get_fused_fmaps(img_1)
     img_2 = BackBoneUtils.get_fused_fmaps(img_2)
@@ -35,7 +37,8 @@ def compute_similarity_differences_mse(img_1, img_2):
     assert not before_loss_nans , "[ERROR] loss cant be computed on  nans"
     
     # we can now compute loss 
-    return tf.math.reduce_mean(tf.math.square(img_1-img_2))
+    squared_diff = tf.math.square(img_1-img_2)
+    return tf.reduce_mean(tf.boolean_mask(squared_diff, tf.math.is_finite(squared_diff)))
     
     
 def combine_ssim_losses(ssim_fir_frgb,
@@ -50,13 +53,32 @@ def combine_ssim_losses(ssim_fir_frgb,
     return total_loss
    
     
-def get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps):
+def get_losses_febackbone(warped_inputs,
+                          template_images,
+                          warped_fmaps,
+                          ir_fmaps):
         """
         Given feature maps, and images compute losses and return them in dictionary
         
         Return:
                 total_loss, detailed_losses
         """
+        
+        # check for assumptions
+        # create copies of inputs
+        # warped_inputs = tf.identity(warped_inputs)
+        # template_images = tf.identity(template_images)
+        # warped_fmaps = tf.identity(warped_fmaps)
+        # ir_fmaps = tf.identity(ir_fmaps)
+        
+        
+        
+        
+        assert np.isfinite(warped_inputs).all(), "[ERROR] warped_inputs has nans"
+        assert np.isfinite(template_images).all(), "[ERROR] template_images has nans"
+        assert np.isfinite(warped_fmaps).all(), "[ERROR] warped_fmaps has nans"
+        assert np.isfinite(ir_fmaps).all(), "[ERROR] ir_fmaps has nans"
+        
         # compute similarity losses                
         _fir_frgb  = compute_similarity_differences_mse(template_images, warped_fmaps)#should be minimal
         _fir_Iir   = compute_similarity_differences_mse(ir_fmaps,template_images)
@@ -65,24 +87,15 @@ def get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps):
         _frgb_Iir  = compute_similarity_differences_mse(warped_fmaps,template_images)#
         _Iir_Irgb  = compute_similarity_differences_mse(template_images,warped_inputs)
         
-        
-        ################### experime ntal ###################
-        
-        # _fir_frgb  = compute_similarity_differences_mse(template_images, warped_fmaps)#should be minimal
-        # _fir_Iir   = compute_similarity_differences_mse(ir_fmaps,template_images)
-        # _frgb_Irgb = compute_similarity_differences_mse(warped_fmaps,warped_inputs)#should be minimal
-        # _fir_Irgb  = compute_similarity_differences_mse(ir_fmaps,warped_inputs)#should be minimal
-        # _frgb_Iir  = compute_similarity_differences_mse(warped_fmaps,template_images)#
-        # _Iir_Irgb  = compute_similarity_differences_mse(template_images,warped_inputs)
-        
-        ################### experime ntal ###################
-        
+    
+        total_loss_mse = 0
         losses_weights = [1,.001,1,1,.0000001,.0000001]
         losses = [_fir_frgb, _fir_Iir, _frgb_Irgb, _fir_Irgb, _frgb_Iir, _Iir_Irgb]
         losses = [i*j for i,j in zip(losses,losses_weights)]
-        total_loss_mse = tf.math.reduce_sum(losses)
-        
-        
+        total_loss_mse = tf.reduce_sum(tf.boolean_mask(losses, tf.math.is_finite(losses)))
+        #add epsilon safe guard
+        # total_loss_mse = tf.convert_to_tensor(tf.keras.backend.epsilon(),dtype="float") + (total_loss_mse if tf.math.is_finite(total_loss_mse) else 0)
+        total_loss_mse = tf.convert_to_tensor(tf.keras.backend.epsilon(),dtype="float") + tf.cast((total_loss_mse if tf.math.is_finite(total_loss_mse) else 0),dtype="float")
         # create losss dictionary
         detailed_batch_losses = {"fir_frgb": _fir_frgb.numpy(),
                                     "fir_Iir": _fir_Iir.numpy(),
@@ -92,11 +105,12 @@ def get_losses_febackbone(warped_inputs,template_images,warped_fmaps,ir_fmaps):
                                     "ir_Irgb": _Iir_Irgb.numpy(),
                                     "total_loss": total_loss_mse.numpy()
                                     }
-        
+        # loss shouldn't be nan
+        assert np.isfinite(total_loss_mse).all(), f"{detailed_batch_losses}[ERROR] total_loss is None"
         return total_loss_mse , detailed_batch_losses
     
     
-def get_losses_regression_head( predictions, 
+def get_losses_regression_head(predictions, 
                                 ground_truth_corners,
                                 gt_matrix , 
                                 predicting_homography):
@@ -113,8 +127,8 @@ def get_losses_regression_head( predictions,
     # if we are predicting homographies
     if predicting_homography:
         # append ones to to the predictions 
-        ones = tf.ones((predictions.shape[0],1))
-        predictions = tf.concat([predictions, ones], axis=-1)
+        ones = tf.cast(tf.ones((predictions.shape[0],1)),dtype="float")
+        predictions = tf.concat([tf.cast(predictions,dtype="float"), ones], axis=-1)
         # reshape predictions to be [batch_size, 3,3]
         prediction_matrices = tf.reshape(predictions, (-1,3,3))
         # get predicted corners from predicted homographies
@@ -134,18 +148,29 @@ def get_losses_regression_head( predictions,
     
 
     
+    #tf.reduce_mean(tf.boolean_mask(squared_diff, tf.math.is_finite(squared_diff)))
     # compute the loss
-    l1_homography_loss = tf.math.reduce_mean(tf.math.abs(prediction_matrices - gt_matrix))
-    l2_homography_loss = tf.math.reduce_mean(tf.math.square(prediction_matrices - gt_matrix))
-    l1_corners_loss = tf.math.reduce_mean(tf.math.abs(prediction_corners - ground_truth_corners))
-    l2_corners_loss = tf.math.reduce_mean(tf.math.square(prediction_corners - ground_truth_corners))
+    var1_intermidiate = tf.math.abs(prediction_matrices - gt_matrix)
+    l1_homography_loss = tf.reduce_mean(tf.boolean_mask(var1_intermidiate, tf.math.is_finite(var1_intermidiate)))
+    
+    #
+    var2_intermidiate = tf.math.square(prediction_matrices - gt_matrix)
+    l2_homography_loss = tf.reduce_mean(tf.boolean_mask(var2_intermidiate, tf.math.is_finite(var2_intermidiate)))
+    
+    #
+    var3_intermidiate = tf.math.abs(prediction_corners - ground_truth_corners)
+    l1_corners_loss = tf.reduce_mean(tf.boolean_mask(var3_intermidiate, tf.math.is_finite(var3_intermidiate)))
+    
+    #
+    var4_intermidiate = tf.math.square(prediction_corners - ground_truth_corners)
+    l2_corners_loss = tf.reduce_mean(tf.boolean_mask(var4_intermidiate, tf.math.is_finite(var4_intermidiate)))
     
     
     losses_weights = [.0,1.0,.0,.0] if predicting_homography else [.0,.0,.0,1.0]
     losses = [l1_homography_loss, l2_homography_loss, l1_corners_loss, l2_corners_loss]
     losses = [i*j for i,j in zip(losses,losses_weights)]
-    total_loss = tf.math.reduce_sum(losses)
-    
+    total_loss = tf.reduce_sum(tf.boolean_mask(losses, tf.math.is_finite(losses)))
+    total_loss = tf.convert_to_tensor(tf.keras.backend.epsilon(),dtype="float") + tf.cast((total_loss if tf.math.is_finite(total_loss) else 0),dtype="float")
 
     # create losss dictionary
     detailed_batch_losses = {"l1_homography_loss": l1_homography_loss.numpy(),
@@ -155,7 +180,7 @@ def get_losses_regression_head( predictions,
                             "total_loss": total_loss.numpy()
                             }
     # total loss must be a tensor
-    assert total_loss is not None, f"{losses}[ERROR] total_loss is None"
+    # assert total_loss is not None, f"{losses}[ERROR] total_loss is None"
         
     return total_loss, detailed_batch_losses
     
