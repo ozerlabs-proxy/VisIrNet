@@ -1,7 +1,7 @@
 {
     "dataset" : "VEDAI",
-    "TrainFirstStage" : true,
-    "TrainSecondStage" : true,
+    "TrainFirstStage" : false,
+    "TrainSecondStage" : false,
     "B_R_uuid" : null,
     "BATCH_SIZE" :8,
     "SHUFFLE_BUFFER_SIZE" : 1000,
