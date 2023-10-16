@@ -118,9 +118,9 @@ regressionHead= model_setup.getRegressionHead(input_shape = configs.REGRESSION_I
 # 
 # # visualize and save models
 
-Utils.plot_and_save_model_structure(featureEmbeddingBackBone,
-                                            save_path="resources/",
-                                            save_as=f"featureEmbeddingBackBone_Resnet")
+# Utils.plot_and_save_model_structure(featureEmbeddingBackBone,
+#                                             save_path="resources/",
+#                                             save_as=f"Resnet")
 # Utils.plot_and_save_model_structure(regressionHead,
 #                                             save_path="resources/",
 #                                             save_as=f"regressionHead")

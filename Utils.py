@@ -12,7 +12,7 @@ def plot_and_save_model_structure(model,
     """
     Plot and save the model structure
     """
-    model_name = model.name if model.name else save_as
+    model_name = save_as if not model.name else f'{save_as}-{model.name}'
     save_path = Path(save_path)
     save_path.mkdir(parents=True, exist_ok=True)
     save_path = save_path / f"{model_name }.png"

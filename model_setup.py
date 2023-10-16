@@ -24,10 +24,10 @@ def getFeatureEmbeddingBackBone(rgb_inputs_shape,
             return model based on which backbone is requested
         """
         
-        model = BasicModelTools.getFeatureEmbeddingBackBone_Basic(rgb_inputs_shape,
-                                                                ir_inputs_shape,
-                                                                output_channels_per_block,
-                                                                blocks_count)
+        # model = BasicModelTools.getFeatureEmbeddingBackBone_Basic(rgb_inputs_shape,
+        #                                                         ir_inputs_shape,
+        #                                                         output_channels_per_block,
+        #                                                         blocks_count)
         model = ResnetTools.getFeatureEmbeddingBackBone_Resnet(rgb_inputs_shape,
                                                                 ir_inputs_shape,
                                                                 output_channels_per_block)
