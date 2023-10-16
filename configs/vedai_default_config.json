@@ -5,6 +5,7 @@
     "B_R_uuid" : null,
 
     "BATCH_SIZE" :8,
+    "BATCH_SIZE" :8,
     "SHUFFLE_BUFFER_SIZE" : 1000,
 
     "RGB_INPUTS_SHAPE" : [192,192,3],
