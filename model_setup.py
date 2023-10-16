@@ -20,12 +20,12 @@ def residual_block(x,
     x_skip = x
 
     x = layers.Conv2D(number_of_filters, kernel_size=(3, 3), strides=(1,1), padding="same")(x_skip)
-    x = layers.BatchNormalization(-1)(x)
+    # x = layers.BatchNormalization(-1)(x)
     x = layers.Activation("relu")(x)
 
     
     x = layers.Conv2D(number_of_filters, kernel_size=(3, 3), padding="same")(x)
-    x = layers.BatchNormalization(axis=-1)(x)
+    # x = layers.BatchNormalization(axis=-1)(x)
     if match_filter_size:
         x_skip = layers.Lambda(lambda x: tf.pad(x[:,:,:,:],
                                             tf.constant([[0, 0,], 
@@ -36,9 +36,7 @@ def residual_block(x,
     x = layers.Add()([x, x_skip])
     # Nonlinearly activate the result
     x = layers.Activation("relu")(x)
-    x = layers.Conv2D(number_of_filters, kernel_size=(3, 3), strides=(1,1), padding="same")(x)
-    x = layers.Activation("relu")(x)
-    x= tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(1, 1), padding='same')(x)
+
     
     # Return the result
     return x
@@ -72,7 +70,7 @@ def FeatureEmbeddingBlock(inputs,
                         kernel_size=(3,3),
                         strides=(1,1), 
                         padding="same")(inputs)
-    x = layers.BatchNormalization(-1)(x)
+    # x = layers.BatchNormalization(-1)(x)
     x = layers.Activation("relu")(x)
     
 
