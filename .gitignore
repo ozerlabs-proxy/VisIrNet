@@ -6,8 +6,8 @@ tensorboard/*
 logs/tensorboard
 models
 slurm_logs
-backups-and-files
-backups-and-files/*
+backups
+./backups
 
 # ignore cython files
 global-exclude *.pyx

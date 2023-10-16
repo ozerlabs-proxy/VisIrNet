@@ -3,8 +3,6 @@
     "TrainFirstStage" : true,
     "TrainSecondStage" : true,
     "B_R_uuid" : null,
-
-    "BATCH_SIZE" :8,
     "BATCH_SIZE" :8,
     "SHUFFLE_BUFFER_SIZE" : 1000,
 
