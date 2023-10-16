@@ -27,7 +27,7 @@ def train_step(model,
     epochs_losses_summary= defaultdict(list)
     
     print(f"[INFO] training  on {len(dataloader)} pairs")
-    for i, batch in tqdm(enumerate(dataloader)):
+    for i, batch in tqdm(enumerate(dataloader.take(256))):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -109,7 +109,7 @@ def test_step(model,
     
     epochs_losses_summary= defaultdict(list)
     print(f"[INFO] testing  on {len(dataloader)} pairs")
-    for i, batch in enumerate(dataloader):
+    for i, batch in enumerate(dataloader.take(256)):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
