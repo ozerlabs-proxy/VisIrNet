@@ -1,6 +1,18 @@
 """
 Script will link datasets to the data folder, which we will work with.
 """
+
+
+""" you can alternatively run the following commands in the terminal
+    cd data 
+    ln -s ~/ozerlabs-workspace/Datasets/GoogleEarth .
+    ln -s ~/ozerlabs-workspace/Datasets/MSCOCO .
+    ln -s ~/ozerlabs-workspace/Datasets/SkyData .
+    ln -s ~/ozerlabs-workspace/Datasets/VEDAI .
+    ln -s ~/ozerlabs-workspace/Datasets/GoogleMap .
+
+"""
+
 import os
 import sys
 from pathlib import Path
@@ -27,7 +39,7 @@ os.chdir(ROOT_DIR)
 # lets create symbolic links to the data
 
 assert Path.cwd().name == "VisIrNet", "You need to be in the root directory of the project"
-SOURCE_PATH = Path.home() / "shortcuts/Datasets/imageRegistration/"
+SOURCE_PATH = Path.home() / "ozerlabs-workspace/Datasets/"
 datasets = list(SOURCE_PATH.glob("*"))
 DATA_DIR = Path.cwd() / "data"
 
@@ -37,5 +49,4 @@ DATA_DIR = Path.cwd() / "data"
 for dataset in datasets:
     if dataset.is_dir():
         os.symlink(dataset, DATA_DIR / dataset.name)
-
 

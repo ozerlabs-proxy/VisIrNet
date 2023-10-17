@@ -73,7 +73,7 @@ def train_step(model,
                 
         all_parameters= model.trainable_variables
         # assert tf.math.is_finite(all_parameters).all(), "all_parameters in backbone are inf or NaN"
-        grads = tape.gradient(total_loss, all_parameters)
+        grads = tape.gradient(total_loss, all_parameters,unconnected_gradients=tf.UnconnectedGradients.ZERO)
         grads = [tf.clip_by_value(i,-0.1,0.1) for i in grads]        
         # assert tf.math.is_finite(grads).all(), "Gradients in backbone are inf or NaN"
         optimizer.apply_gradients(zip(grads, all_parameters))
