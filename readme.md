@@ -28,6 +28,27 @@
 
 ```
 
+### Data
+
+
+```bash
+# create data under VisIrNet/
+mkdir data
+cd data
+
+##1. you can run the linking script
+# python ./scripts/link_datasets_to_data.py
+#2 create symbolic links to datasets
+
+cd data 
+ln -s ~/ozerlabs-workspace/Datasets/GoogleEarth .
+ln -s ~/ozerlabs-workspace/Datasets/MSCOCO .
+ln -s ~/ozerlabs-workspace/Datasets/SkyData .
+ln -s ~/ozerlabs-workspace/Datasets/VEDAI .
+ln -s ~/ozerlabs-workspace/Datasets/GoogleMap .
+```
+
+
 ## Training
 
 change configuration file in `training.sh`
