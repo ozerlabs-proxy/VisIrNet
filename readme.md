@@ -41,11 +41,11 @@ cd data
 #2 create symbolic links to datasets
 
 cd data 
-ln -s ~/ozerlabs-workspace/Datasets/GoogleEarth .
-ln -s ~/ozerlabs-workspace/Datasets/MSCOCO .
-ln -s ~/ozerlabs-workspace/Datasets/SkyData .
-ln -s ~/ozerlabs-workspace/Datasets/VEDAI .
-ln -s ~/ozerlabs-workspace/Datasets/GoogleMap .
+ln -s ~/ozerlabs-workspace/Datasets/registration-datasets/GoogleEarth .
+ln -s ~/ozerlabs-workspace/Datasets/registration-datasets/MSCOCO .
+ln -s ~/ozerlabs-workspace/Datasets/registration-datasets/SkyData .
+ln -s ~/ozerlabs-workspace/Datasets/registration-datasets/VEDAI .
+ln -s ~/ozerlabs-workspace/Datasets/registration-datasets/GoogleMap .
 ```
 
 
