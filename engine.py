@@ -77,13 +77,17 @@ def train_first_stage(model: tf.keras.Model,
     
     for  epoch in range(epochs):
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
-        model , _per_epoch_train_losses = backbone_engine.train_step(model = model,
+        model , _per_epoch_train_losses , train_log = backbone_engine.train_step(model = model,
                                                                         dataloader = train_dataloader,
                                                                         optimizer = optimizer)
         
         
-        _per_epoch_test_results = backbone_engine.test_step(model=model,
+        _per_epoch_test_results , test_log = backbone_engine.test_step(model=model,
                                                             dataloader=test_dataloader)
+        
+        print(f"[train_loss] : {train_log}")
+        print(f"[test_loss] : {test_log}")
+        
         # 6. Save model
         if (epoch+1) % save_frequency == 0:
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)
