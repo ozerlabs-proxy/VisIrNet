@@ -9,11 +9,15 @@ import numpy as np
 def compute_similarity_differences_mse (img_1, img_2):
     # chanels_kept = tf.math.minimum(img_1.shape[3], img_2.shape[3])
     #just get the first 3 channels for now
+    
+    img_1= tf.cast(img_1, dtype="float")
+    img_2 = tf.cast(img_2, dtype="float")
+
     max_height = tf.math.maximum(img_1.shape[1], img_2.shape[1])
     max_width = tf.math.maximum(img_1.shape[2], img_2.shape[2])
 
-    # img_1= img_1[:,:,:,:3]
-    # img_2 = img_2[:,:,:,:3]
+    # img_1= tf.cast(img_1[:,:,:,:3], dtype="float")
+    # img_2 = tf.cast(img_2[:,:,:,:3], dtype="float")
 
     pad_height1 = (max_height - img_1.shape[1]) // 2
     pad_width1 = (max_width - img_1.shape[2]) // 2

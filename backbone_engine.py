@@ -28,7 +28,7 @@ def train_step(model,
     
     print(f"[INFO] training  on {len(dataloader)} pairs")
 
-    for i, batch in enumerate(dataloader.take(256)):
+    for i, batch in tqdm(enumerate(dataloader)):
     
         input_images, template_images, labels,_instances = batch
         
@@ -89,7 +89,7 @@ def train_step(model,
     # display losses
     log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary.items()])
     print(f"[train_loss] : {log}")
-    return model, epochs_losses_summary
+    return model, epochs_losses_summary ,log
 
 
 
@@ -101,24 +101,9 @@ def test_step(model,
     
     print(f"[INFO] testing  on {len(dataloader)} pairs")
     
-    for i, batch in enumerate(dataloader.take(256)):
+    for i, batch in tqdm(enumerate(dataloader)):
         input_images, template_images, labels,_instances = batch
-        
-        # # add batch dim if shape is not (batch_size, height, width, channels)
-        # if len(input_images.shape) != 4:            
-        #     print(f'[unmatching shape] : {input_images.shape}')
-        #     print(f'[unmatching shape] : {template_images.shape}')
-        #     print(f'[unmatching shape] : {labels.shape}')
-        
-        #     input_images = tf.expand_dims(input_images, axis=0)
-        #     template_images  = tf.expand_dims(template_images, axis=0)
-        #     labels = tf.expand_dims(labels, axis=0)
-            
-        # assert len(input_images.shape) == 4, "input_images shape is not (batch_size, height, width, channels)"
-        # assert len(template_images.shape) == 4, "template_images shape is not (batch_size, height, width, channels)"
-        # assert len(labels.shape) == 2, "labels shape is not (batch_size, uv_list/homography)"
-        
-        
+
         gt_matrix = DatasetTools.get_ground_truth_homographies(labels)
         # assert gt_matrix.shape == (input_images.shape[0], 3, 3), "gt_matrix shape is not (batch_size, 3, 3)"
         
@@ -154,4 +139,4 @@ def test_step(model,
     log = " | ".join([str(str(i)+ " :" + str(k)) for i,k in epochs_losses_summary.items()])
     print(f"[test_loss] : {log}")
     
-    return epochs_losses_summary
+    return epochs_losses_summary ,log
