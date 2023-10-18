@@ -27,14 +27,14 @@ def train_step(model,
     
     dataloader = dataloader.shuffle(1000)   
         
-    model.compile(optimizer=optimizer,experimental_run_tf_function=False) 
+    # model.compile(optimizer=optimizer,experimental_run_tf_function=False) 
     epochs_losses_summary= {"backbone": defaultdict(list),
                             "regression_head": defaultdict(list)
                             }
     
     assert backBone is not None, "the feature embedding backbone is not defined"
     print(f"[INFO] training  on {len(dataloader)} pairs")
-    for i, batch in tqdm(enumerate(dataloader.take(256))):
+    for i, batch in tqdm(enumerate(dataloader)):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -65,15 +65,16 @@ def train_step(model,
                                                                                                 ground_truth_corners = labels,
                                                                                                 gt_matrix = gt_matrix, 
                                                                                                 predicting_homography=predicting_homography)
-                # assert np.isfinite(total_loss).all(), "Loss is NaN"
+                # assert tf.reduce_all(tf.math.is_finite(total_loss)), "Loss is NaN"
                 
         all_parameters= model.trainable_variables
         grads = tape.gradient(total_loss, all_parameters)
         grads = [tf.clip_by_value(i,-0.1,0.1) for i in grads]
-        # assert np.isfinite(grads).all(), "Gradients in regression head are inf or NaN"
+        # assert tf.reduce_all(tf.math.is_finite(grads)), "Gradients in regression head are inf or NaN"
         optimizer.apply_gradients(zip(grads, all_parameters))
         
         # add losses to epoch losses
+        detailed_batch_losses = {key: value.numpy() for key, value in detailed_batch_losses.items()}
         for key, value in detailed_batch_losses.items():
             epochs_losses_summary["regression_head"][key].append(value)
             
@@ -85,8 +86,9 @@ def train_step(model,
                                                                                                     warped_fmaps,
                                                                                                     ir_fmaps)
         # loss shouldn't be nan
-        assert np.isfinite(total_loss_backbone).all(), "total_loss_backbone Loss is NaN"    
+        assert tf.reduce_all(tf.math.is_finite(total_loss_backbone)), "total_loss_backbone Loss is NaN"    
         # add losses to epoch losses
+        detailed_batch_losses_backbone = {key: value.numpy() for key, value in detailed_batch_losses_backbone.items()}
         for key, value in detailed_batch_losses_backbone.items():
             epochs_losses_summary["backbone"][key].append(value)  
         # log = " ".join([str(i + " :" + k + "\n") for i,k in detailed_batch_losses.items()])
@@ -117,14 +119,14 @@ def test_step(model,
     
     assert backBone is not None, "the feature embedding backbone is not defined"
     print(f"[INFO] testing  on {len(dataloader)} pairs")
-    for i, batch in enumerate(dataloader.take(256)):
+    for i, batch in enumerate(dataloader):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
-        if len(input_images.shape) != 4:
-            input_images = tf.expand_dims(input_images, axis=0)
-            template_images  = tf.expand_dims(template_images, axis=0)
-            labels = tf.expand_dims(labels, axis=0)
+        # if len(input_images.shape) != 4:
+        #     input_images = tf.expand_dims(input_images, axis=0)
+        #     template_images  = tf.expand_dims(template_images, axis=0)
+        #     labels = tf.expand_dims(labels, axis=0)
         
         # pass the input images through the backbone
         
@@ -147,8 +149,9 @@ def test_step(model,
                                                                                         ground_truth_corners = labels,
                                                                                         gt_matrix = gt_matrix, 
                                                                                         predicting_homography=predicting_homography)
-        # assert np.isfinite(total_loss).all(), "Loss is NaN or Inf"
+        # assert tf.reduce_all(tf.math.is_finite(total_loss)), "Loss is NaN or Inf"
         # add losses to epoch losses
+        detailed_batch_losses = {key: value.numpy() for key, value in detailed_batch_losses.items()}
         for key, value in detailed_batch_losses.items():
             epochs_losses_summary["regression_head"][key].append(value)
             
@@ -159,8 +162,9 @@ def test_step(model,
                                                                                                     warped_fmaps,
                                                                                                     ir_fmaps)
         # loss shouldn't be nan
-        # assert np.isfinite(total_loss_backbone).all(), "BackBone Loss is NaN or Inf"    
+        # assert tf.reduce_all(tf.math.is_finite(total_loss_backbone)), "BackBone Loss is NaN or Inf"    
         # add losses to epoch losses
+        detailed_batch_losses_backbone = {key: value.numpy() for key, value in detailed_batch_losses_backbone.items()}
         for key, value in detailed_batch_losses_backbone.items():
             epochs_losses_summary["backbone"][key].append(value)
     

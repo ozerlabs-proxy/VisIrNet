@@ -71,6 +71,10 @@ def train_first_stage(model: tf.keras.Model,
 
     
     # 4. Loop over the epochs
+    
+    # compile the model with the optimizer
+    model.compile(optimizer=optimizer) 
+    
     for  epoch in range(epochs):
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
         model , _per_epoch_train_losses = backbone_engine.train_step(model = model,
@@ -186,6 +190,10 @@ def train_second_stage(model: tf.keras.Model,
                                                     log_id=f"{dataset_name}-{str(uuid)}",
                                                     suffix="2-test")
     # 3. Loop over the epochs
+    
+    # compile the model with the optimizer
+    model.compile(optimizer=optimizer) 
+    
     for  epoch in range(epochs):
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
         model, _per_epoch_train_losses = regression_head_engine.train_step(model=model,

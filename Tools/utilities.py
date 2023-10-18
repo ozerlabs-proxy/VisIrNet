@@ -10,7 +10,7 @@ def tensor_has_nan(some_tensor):
         """
 
         
-        return not np.isfinite(some_tensor).all()
+        return not tf.reduce_all(tf.math.is_finite(some_tensor))
 
 
 # dumping json needs to convert numpy types to python types

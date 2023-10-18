@@ -95,7 +95,7 @@ for dataset in ["VEDAI","SkyData","GoogleEarth","GoogleMap","MSCOCO"]:
 
             
             # check for nans
-            if not np.isfinite(input_images).all() or  not np.isfinite(template_images).all():
+            if not tf.reduce_all(tf.math.is_finite(input_images)) or  not tf.reduce_all(tf.math.is_finite(template_images)):
                 dataset_info[split]["NaNs"].append(str(_instances.numpy()[0]))
                 
             homography_matrices = DatasetTools.get_ground_truth_homographies(labels) 
@@ -109,7 +109,7 @@ for dataset in ["VEDAI","SkyData","GoogleEarth","GoogleMap","MSCOCO"]:
             try:
                 warped_images, _transformed_have_nans = DatasetTools._transformed_images(input_images,homography_matrices)
             except:
-                # log all shapes
+                # log all shapes.all(
                 print("*"*50 + " _instances " + "*"*50)
                 print(_instances)
                 print(f"input_images.shape: {input_images.shape}")
