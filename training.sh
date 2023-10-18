@@ -6,7 +6,3 @@
 # python Train.py --config-file skydata_default_config.json
 python Train.py --config-file vedai_default_config.json 
 # python Train.py --config-file googlemap_default_config.json
-
-
-
-          
