@@ -10,7 +10,7 @@ import cv2
 from Tools.warper import Warper
 
 
-
+@tf.function
 def _get_warped_sampled(images, 
                         homography_matrices):
     """
@@ -30,14 +30,16 @@ def _get_warped_sampled(images,
     assert len(homography_matrices.shape) == 3, "homography_matrices shape is not (batch_size, 3, 3)"
     assert homography_matrices.shape[0] == batch_size, "batch_size of images and homography_matrices do not match"
 
-    _warper = Warper( batch_size , 128 , 128 )
+    #perform this on cpu
+    with tf.device('/cpu:0'):
+        _warper = Warper( batch_size , 128 , 128 )
+        warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
 
-    warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
     warped_sampled = tf.cast(warped_sampled, tf.float32)
     
-    _transformed_images_have_nans = not np.isfinite(warped_sampled).all()  
+    _transformed_images_have_nans = not tf.reduce_all(tf.math.is_finite(warped_sampled))
     
-    assert not _transformed_images_have_nans, "<<<<<<<<<<<<<<<<transformed images have nans >>>>>>>>" 
+    # assert not _transformed_images_have_nans, "<<<<<<<<<<<<<<<<transformed images have nans >>>>>>>>" 
     
     return warped_sampled, _transformed_images_have_nans  
 
@@ -55,10 +57,11 @@ def _transformed_images(images, homography_matrices):
     batch_size = images.shape[0]
     assert homography_matrices.shape[0] == batch_size, "batch_size of images and homography_matrices do not match"
 
-    _warper = Warper(batch_size,height_template=128,width_template=128)
-    warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
+    with tf.device('/cpu:0'):
+        _warper = Warper( batch_size , 128 , 128 )
+        warped_sampled = _warper.projective_inverse_warp(images, homography_matrices)
     
-    _transformed_images_have_nans = not np.isfinite(warped_sampled).all()  
+    _transformed_images_have_nans = not tf.reduce_all(tf.math.is_finite(warped_sampled))
     
     return warped_sampled, _transformed_images_have_nans  
 
@@ -82,6 +85,9 @@ def get_initial_motion_matrix():
     h_matrix = h_matrix / h_matrix[2,2]    
     return np.asarray(h_matrix).astype(np.float32)
 
+
+# @tf.function
+#TODO improve this functions to use only tf functions
 def get_ground_truth_homographies(u_v_list):
     """
         u_v_list: [batch_size, 8]
@@ -119,8 +125,8 @@ def get_ground_truth_homographies(u_v_list):
     dividend = tf.expand_dims(dividend, axis=-1)
     dividend = tf.expand_dims(dividend, axis=-1)
     homography_matrices = tf.divide(homography_matrices,dividend)
-    assert np.isfinite(homography_matrices).all(), "homography matrices have nan values"
-    return homography_matrices
+    # assert tf.reduce_all(tf.math.is_finite(homography_matrices)), "homography matrices have nan values"
+    return tf.convert_to_tensor(homography_matrices,dtype="float")
 
 def get_inverse_homographies(homography_matrices):
     """
@@ -140,7 +146,7 @@ def is_invertible(homography_matrices):
         get inverses and check if they are invertible
     """
     inverse_matrices = get_inverse_homographies(homography_matrices)
-    invertible = np.isfinite(inverse_matrices).all()
+    invertible = tf.reduce_all(tf.math.is_finite(inverse_matrices))
     
     return inverse_matrices, invertible
 
@@ -158,7 +164,7 @@ def homographies_to_corners(prediction_matrices):
         
     """
     
-    assert len(prediction_matrices.shape) == 3, "prediction_matrices should be [batch_size, 3,3]"
+    # assert len(prediction_matrices.shape) == 3, "prediction_matrices should be [batch_size, 3,3]"
     batch_size = prediction_matrices.shape[0]
     # get initial corners
     initial_corners = np.asarray([[0,0,1],[127,0,1],[0,127,1],[127,127,1]])
@@ -193,7 +199,7 @@ def corners_to_homographies(prediction_corners):
         return: [batch_size, 3, 3]
         homography matrices from u_v_list
     """
-    assert len(prediction_corners.shape) == 2, "prediction_corners should be [batch_size, 8]"
+    # assert len(prediction_corners.shape) == 2, "prediction_corners should be [batch_size, 8]"
     batch_size = prediction_corners.shape[0]
     u_list = prediction_corners[:, :4]
     v_list = prediction_corners[:, 4:]
@@ -222,5 +228,5 @@ def corners_to_homographies(prediction_corners):
     dividend = tf.expand_dims(dividend, axis=-1)
     dividend = tf.expand_dims(dividend, axis=-1)
     homography_matrices = tf.divide(homography_matrices,dividend)
-    assert np.isfinite(homography_matrices).all(), "homography matrices have nan values"
+    # assert tf.reduce_all(tf.math.is_finite(homography_matrices)), "homography matrices have nan values"
     return homography_matrices

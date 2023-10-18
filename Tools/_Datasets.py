@@ -148,11 +148,11 @@ class Dataset():
         assert _instance == _instance_path.stem, f"_instance is not {_instance_path.stem} but {_instance}"
         
         # assert all are contain finate values
-        assert np.isfinite(input_image).all() , f"input_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
-        assert np.isfinite(template_image).all() , f"template_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
-        assert np.isfinite(label).all() , f"label contain non finite values {label} ----- {tf.strings.as_string(str(_instance))}"
+        assert tf.reduce_all(tf.math.is_finite(input_image)) , f"input_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
+        assert tf.reduce_all(tf.math.is_finite(template_image)) , f"template_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
+        assert tf.reduce_all(tf.math.is_finite(label)) , f"label contain non finite values {label} ----- {tf.strings.as_string(str(_instance))}"
         
         
         _instance = tf.strings.as_string(str(_instance))
         
-        return input_image, template_image, label ,_instance
+        return tf.cast(input_image,dtype="float"), tf.cast(template_image,dtype="float"), tf.cast(label, dtype="float") , _instance
