@@ -16,7 +16,7 @@ python Train.py --config-file skydata_default_config.json --b_loss_function ssim
 # python Train.py --config-file skydata_default_config.json --b_loss_function sse_pixel  --train_first_stage True
 
 ##>>>>>>>>>>>>>>>>>>>>>>>> regression head  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-python Train.py --config-file skydata_default_config.json --b_loss_function ssim_pixel   --train_second_stage True --r_loss_function l2_homography_loss
+# python Train.py --config-file skydata_default_config.json --b_loss_function ssim_pixel   --train_second_stage True --r_loss_function l2_homography_loss
 # python Train.py --config-file skydata_default_config.json --b_loss_function mse_pixel  --train_second_stage True --r_loss_function l2_homography_loss
 # python Train.py --config-file skydata_default_config.json --b_loss_function mae_pixel  --train_second_stage True --r_loss_function l2_homography_loss
 # python Train.py --config-file skydata_default_config.json --b_loss_function sse_pixel  --train_second_stage True --r_loss_function l2_homography_loss

@@ -50,7 +50,7 @@ def train_first_stage(model: tf.keras.Model,
     
     #if from_checkpoint is not None load the saved model
     if from_checkpoint is not None:
-        pattern = f"*featureEmbeddingBackBone*" if str(from_checkpoint)=="latest" else f"{from_checkpoint}*"
+        pattern = f"*{loss_function}-{model.name}*" if str(from_checkpoint)=="latest" else f"{from_checkpoint}*"
         model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
         log_tag["resumed_from"] = str(model_name)
         model = common_utils.load_model(model_name)
@@ -97,7 +97,7 @@ def train_first_stage(model: tf.keras.Model,
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)
             common_utils.save_model_weights(model = model,
                                             save_path = save_path,
-                                            save_as = f'{save_as}-{uuid}',
+                                            save_as=f"{log_tag['tag_name']}",
                                             tag = str(hard_tag))
             
     
@@ -161,7 +161,7 @@ def train_second_stage(model: tf.keras.Model,
                     "test_size": len(test_dataloader),
                     "featureEmbeddingBackBone": None,
                     "predicting_homography": predicting_homography,
-                    "tag_name": f"{dataset_name}-{model.name}-{homography_based}-2-{epochs}-{uuid}",
+                    "tag_name": f"{dataset_name}-{model.name}-{backbone_loss_function}-{loss_function_to_use}-{homography_based}-2-{epochs}-{uuid}",
                     "per_epoch_metrics":{
                         "backbone_train_loss": defaultdict(list),
                         "backbone_test_results":defaultdict(list),
@@ -173,14 +173,14 @@ def train_second_stage(model: tf.keras.Model,
     backBone = None
     #if from_checkpoint is not None load the saved model
     if from_checkpoint is not None:
-        pattern = f"*regressionHead*" if str(from_checkpoint)=="latest" else f"*{from_checkpoint}*"
+        pattern = f"*{model.name}-{backbone_loss_function}-{loss_function_to_use}*" if str(from_checkpoint)=="latest" else f"*{from_checkpoint}*"
         model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
         log_tag["resumed_from"] = str(model_name)
         model = common_utils.load_model(model_name)
         
     # load the feature embedding backbone
     if featureEmbeddingBackBone is not None:
-        pattern = f"*featureEmbeddingBackBone*" if str(featureEmbeddingBackBone)=="latest" else f"*{featureEmbeddingBackBone}*"
+        pattern = f"*{backbone_loss_function}-featureEmbeddingBackBone*" if str(featureEmbeddingBackBone)=="latest" else f"*{featureEmbeddingBackBone}*"
         model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
         log_tag["featureEmbeddingBackbone"] = str(model_name)
         backBone = common_utils.load_model(model_name)
@@ -227,7 +227,7 @@ def train_second_stage(model: tf.keras.Model,
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)
             common_utils.save_model_weights(model=model,
                                             save_path=save_path,
-                                            save_as=f'{save_as}-{uuid}',
+                                            save_as=f"{log_tag['tag_name']}",
                                             tag=str(hard_tag))
             
     

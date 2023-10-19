@@ -107,3 +107,13 @@ which ever used you have access to other derrivations
 - [x] l2_homography_loss
 - [x] l1_corners_loss
 - [x] l2_corners_loss
+
+## TRACK TRAININGs
+
+### BACKBONE
+
+#### SkyData
+- [ ] mse_pixel
+- [ ] mae_pixel
+- [ ] sse_pixel
+- [x] ssim_pixel

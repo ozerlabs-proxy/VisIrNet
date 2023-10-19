@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --nodelist=nova[83]
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --partition=main
 #SBATCH --gres=gpu:1
 ##SBATCH --mem=20G
@@ -38,11 +38,13 @@ conda activate VisIrNet
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TRAINING iNTEGRITY>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>#
 
 echo "--**Training**--"
-# srun nvidia-smi &&  python Train.py --config-file skydata_default_config.json
-srun nvidia-smi && python Train.py --config-file vedai_default_config.json
-# # srun nvidia-smi && python3 Train.py --config-file googlemap_default_config.json 
+
+##>>>>>>>>>>>>>>>>>>>>>>>> skydata backbone <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function ssim_pixel --train_first_stage True 
+# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function mse_pixel  --train_first_stage True
+# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function mae_pixel  --train_first_stage True
+# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function sse_pixel  --train_first_stage True
 
 
-
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<DATASETS iNTEGRITY>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>#
-# srun python scripts/check_dataset_integrity.py 
+## <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<DATASETS iNTEGRITY>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>#
+## srun python scripts/check_dataset_integrity.py 
