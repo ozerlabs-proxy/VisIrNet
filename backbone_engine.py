@@ -19,7 +19,8 @@ from collections import defaultdict
 # train step for the feature embedding backbone
 def train_step(model,
                     dataloader,
-                    optimizer):  
+                    optimizer,
+                    loss_function):  
     
     dataloader = dataloader.shuffle(1000)   
     # model.compile(optimizer=optimizer , experimental_run_tf_function=False) 
@@ -28,7 +29,7 @@ def train_step(model,
     
     print(f"[INFO] training  on {len(dataloader)} pairs")
 
-    for i, batch in tqdm(enumerate(dataloader)):
+    for i, batch in tqdm(enumerate(dataloader.take(16))):
 
     
         input_images, template_images, labels,_instances = batch
@@ -57,7 +58,8 @@ def train_step(model,
                         total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone( warped_inputs,
                                                                                                     template_images,
                                                                                                     warped_fmaps,
-                                                                                                    ir_fmaps)
+                                                                                                    ir_fmaps,
+                                                                                                    loss_function)
                         
                         
                     
@@ -98,13 +100,15 @@ def train_step(model,
 
 # test step for the feature embedding backbone
 def test_step(model,
-                dataloader): 
+                dataloader,
+                loss_function
+                ): 
     
     epochs_losses_summary= defaultdict(list)
     
     print(f"[INFO] testing  on {len(dataloader)} pairs")
     
-    for i, batch in tqdm(enumerate(dataloader)):
+    for i, batch in tqdm(enumerate(dataloader.take(16))):
 
         input_images, template_images, labels,_instances = batch
 
@@ -121,7 +125,8 @@ def test_step(model,
         total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone(warped_inputs,
                                                                                     template_images,
                                                                                     warped_fmaps,
-                                                                                    ir_fmaps)
+                                                                                    ir_fmaps,
+                                                                                    loss_function)
             
         
         # loss shouldn't be nan

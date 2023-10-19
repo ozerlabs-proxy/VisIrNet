@@ -30,16 +30,18 @@ def train_first_stage(model: tf.keras.Model,
                     save_as=f"featureEmbeddingBackBone",
                     save_frequency=1,
                     save_hard_frequency=50,
+                    loss_function="mse_pixel",
                     uuid=""):
     assert save_path is not None, "save_path is None"
     # create a tag for the training
     log_tag = {
                     "model-name": model.name,
                     "epochs": epochs,
+                    "loss_function": loss_function,
                     "resumed_from": None,
                     "train_size": len(train_dataloader),
                     "test_size": len(test_dataloader),
-                    "tag_name": f"{dataset_name}-{model.name}-1-{epochs}-{uuid}",
+                    "tag_name": f"{dataset_name}-{loss_function}-{model.name}-1-{epochs}-{uuid}",
                     "per_epoch_metrics":{"train_loss": defaultdict(list),
                                             "test_results":defaultdict(list)
                                             },
@@ -63,10 +65,10 @@ def train_first_stage(model: tf.keras.Model,
     
     # 3. Create summary writer
     _train_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
-                                                    log_id=f"{dataset_name}-backbone-{str(uuid)}",
+                                                    log_id=f"{dataset_name}-b-{loss_function}-{str(uuid)}",
                                                     suffix="1-train")
     _test_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
-                                                    log_id=f"{dataset_name}-backbone-{str(uuid)}",
+                                                    log_id=f"{dataset_name}-b-{loss_function}-{str(uuid)}",
                                                     suffix="1-test")
 
     
@@ -79,11 +81,13 @@ def train_first_stage(model: tf.keras.Model,
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
         model , _per_epoch_train_losses , train_log = backbone_engine.train_step(model = model,
                                                                         dataloader = train_dataloader,
-                                                                        optimizer = optimizer)
+                                                                        optimizer = optimizer,
+                                                                        loss_function = loss_function)
         
         
         _per_epoch_test_results , test_log = backbone_engine.test_step(model=model,
-                                                            dataloader=test_dataloader)
+                                                            dataloader=test_dataloader,
+                                                            loss_function=loss_function)
         
         print(f"[train_loss] : {train_log}")
         print(f"[test_loss] : {test_log}")
@@ -142,6 +146,8 @@ def train_second_stage(model: tf.keras.Model,
                         save_frequency=1,
                         save_hard_frequency=50,
                         predicting_homography=False,
+                        backbone_loss_function="mse_pixel",
+                        loss_function_to_use="l2_homography_loss",
                         uuid=""):
     assert save_path is not None, "save_path is None"
     homography_based = "homography" if predicting_homography else "corners"
@@ -204,13 +210,18 @@ def train_second_stage(model: tf.keras.Model,
                                                                     backBone=backBone,
                                                                     dataloader=train_dataloader,
                                                                     optimizer=optimizer,
-                                                                    predicting_homography=predicting_homography)
+                                                                    predicting_homography=predicting_homography,
+                                                                    backbone_loss_function=backbone_loss_function,
+                                                                    loss_function_to_use=loss_function_to_use)
         
         
         _per_epoch_test_results ,test_log = regression_head_engine.test_step(model=model,
                                                                     backBone=backBone,
                                                                     dataloader=test_dataloader,
-                                                                    predicting_homography=predicting_homography)
+                                                                    predicting_homography=predicting_homography,
+                                                                    backbone_loss_function=backbone_loss_function,
+                                                                    loss_function_to_use=loss_function_to_use
+                                                                    )
         # 6. Save model
         if (epoch+1) % save_frequency == 0:
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)

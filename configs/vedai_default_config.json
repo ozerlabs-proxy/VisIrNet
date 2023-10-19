@@ -3,7 +3,7 @@
     "TrainFirstStage" : true,
     "TrainSecondStage" : true,
     "B_R_uuid" : null,
-    "BATCH_SIZE" :8,
+    "BATCH_SIZE" :2,
     "SHUFFLE_BUFFER_SIZE" : 1000,
 
     "RGB_INPUTS_SHAPE" : [192,192,3],
@@ -12,8 +12,11 @@
     "R_STACK_COUNT" : 1,
     "OUTPUT_CHANNELS_PER_BLOCK" : 3,
 
+    "B_LOSS_FUNCTION" : "ssim_pixel",
+
     "REGRESSION_INPUT_SHAPE" : null,
     "REGRESSION_OUTPUT_SHAPE" : 8,
+    
 
     "B_initial_learning_rate"  :  0.001,
     "B_decay_steps" : 1000,
@@ -36,7 +39,8 @@
     "R_save_as"  :  "regressionHead",
     "R_save_frequency"  :  1,
     "R_save_hard_frequency" : 2,
-    "R_predicting_homography" : true
+    "R_predicting_homography" : true,
+    "R_LOSS_FUNCTION" : "l2_homography_loss" 
 
 
 }
