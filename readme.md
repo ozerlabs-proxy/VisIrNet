@@ -89,3 +89,21 @@ tensorboard --logdir logs/tensorboard
 - [Playground](notebooks/playground.ipynb)
 - [Visualize fmaps of backbone](notebooks/visualizeBackBoneRes.ipynb)
 - [Visualize fmaps of backbone](notebooks/visualizeBackBoneRes.ipynb)
+
+
+## loss functions logs
+### backbone losses choice
+- [x] mean_squared_error (mse_pixel) "l2"
+- [x] mean_absolute_error (mae_pixel) "l1"
+- [x] sum_squared_error (sse_pixel)
+- [x] structural_similarity (ssim_pixel)
+
+
+### registration losses choice
+
+which ever used you have access to other derrivations
+
+- [x] l1_homography_loss
+- [x] l2_homography_loss
+- [x] l1_corners_loss
+- [x] l2_corners_loss

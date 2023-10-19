@@ -35,7 +35,8 @@ class ConfigurationParser():
         #
         
         assert Configs.REGRESSION_INPUT_SHAPE != None, "REGRESSION_INPUT_SHAPE should not be None"
-        
+        assert Configs.B_LOSS_FUNCTION in ["mse_pixel", "mae_pixel", "sse_pixel", "ssim_pixel"], "B_LOSS_FUNCTION should be one of ['mse_pixel', 'mae_pixel', 'sse_pixel', 'ssim_pixel']"
+        assert Configs.R_LOSS_FUNCTION in ["l1_homography_loss" , "l2_homography_loss" , "l1_corners_loss" , "l2_corners_loss"], "R_LOSS_FUNCTION should be one of ['l1_homography_loss' , 'l2_homography_loss' , 'l1_corners_loss' , 'l2_corners_loss']"
         return Configs
     
     @staticmethod

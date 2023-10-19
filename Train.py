@@ -166,6 +166,7 @@ if configs.TrainFirstStage:
                                                             save_as = configs.B_save_as,
                                                             save_frequency = configs.B_save_frequency,
                                                             save_hard_frequency = configs.B_save_hard_frequency,
+                                                            loss_function = configs.B_LOSS_FUNCTION,
                                                             uuid = configs.B_R_uuid
                                                             )
     # End the timer and print out how long it took
@@ -209,19 +210,12 @@ if configs.TrainSecondStage:
                                                     save_frequency = configs.R_save_frequency,
                                                     save_hard_frequency = configs.R_save_hard_frequency,
                                                     predicting_homography = configs.R_predicting_homography,
+                                                    backbone_loss_function = configs.B_LOSS_FUNCTION,
+                                                    loss_function_to_use = configs.R_LOSS_FUNCTION,
                                                     uuid = configs.B_R_uuid
                                                     )
     # End the timer and print out how long it took
     end_time = timer()
     print(f"Total training time : {end_time-start_time:.3f} seconds\n\n")
-
-# ##
-
-
-# ##
-
-
-# ##
-
 
 

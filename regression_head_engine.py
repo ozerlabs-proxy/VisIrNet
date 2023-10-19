@@ -20,7 +20,8 @@ def train_step(model,
                 backBone,
                 dataloader,
                 optimizer,
-                predicting_homography):  
+                predicting_homography,
+                loss_function_to_use):  
     """
     A train step for the regression head
     """
@@ -34,7 +35,7 @@ def train_step(model,
     
     assert backBone is not None, "the feature embedding backbone is not defined"
     print(f"[INFO] training  on {len(dataloader)} pairs")
-    for i, batch in tqdm(enumerate(dataloader.take(32))):
+    for i, batch in tqdm(enumerate(dataloader.take(16))):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -64,7 +65,8 @@ def train_step(model,
                 total_loss , detailed_batch_losses = loss_functions.get_losses_regression_head( predictions = predictions, 
                                                                                                 ground_truth_corners = labels,
                                                                                                 gt_matrix = gt_matrix, 
-                                                                                                predicting_homography=predicting_homography)
+                                                                                                predicting_homography=predicting_homography,
+                                                                                                loss_function_to_use = loss_function_to_use)
                 # assert tf.reduce_all(tf.math.is_finite(total_loss)), "Loss is NaN"
                 
         all_parameters= model.trainable_variables
@@ -84,7 +86,8 @@ def train_step(model,
         total_loss_backbone , detailed_batch_losses_backbone = loss_functions.get_losses_febackbone(warped_inputs,
                                                                                                     template_images,
                                                                                                     warped_fmaps,
-                                                                                                    ir_fmaps)
+                                                                                                    ir_fmaps,
+                                                                                                    loss_function_to_use)
         # loss shouldn't be nan
         # assert tf.reduce_all(tf.math.is_finite(total_loss_backbone)), "total_loss_backbone Loss is NaN"    
         # add losses to epoch losses
@@ -109,7 +112,9 @@ def train_step(model,
 def test_step(model,
                 backBone,
                 dataloader,
-                predicting_homography): 
+                predicting_homography,
+                backbone_loss_function,
+                loss_function_to_use): 
     """
     Test step for the regression head
     """
@@ -120,7 +125,7 @@ def test_step(model,
     assert backBone is not None, "the feature embedding backbone is not defined"
     print(f"[INFO] testing  on {len(dataloader)} pairs")
     
-    for i, batch in enumerate(dataloader.take(32)):
+    for i, batch in enumerate(dataloader.take(16)):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -149,7 +154,8 @@ def test_step(model,
         total_loss , detailed_batch_losses = loss_functions.get_losses_regression_head( predictions = predictions, 
                                                                                         ground_truth_corners = labels,
                                                                                         gt_matrix = gt_matrix, 
-                                                                                        predicting_homography=predicting_homography)
+                                                                                        predicting_homography=predicting_homography,
+                                                                                        loss_function_to_use = loss_function_to_use)
         # assert tf.reduce_all(tf.math.is_finite(total_loss)), "Loss is NaN or Inf"
         # add losses to epoch losses
         detailed_batch_losses = {key: value.numpy() for key, value in detailed_batch_losses.items()}
@@ -161,7 +167,8 @@ def test_step(model,
         total_loss_backbone , detailed_batch_losses_backbone = loss_functions.get_losses_febackbone(warped_inputs,
                                                                                                     template_images,
                                                                                                     warped_fmaps,
-                                                                                                    ir_fmaps)
+                                                                                                    ir_fmaps,
+                                                                                                    backbone_loss_function)
         # loss shouldn't be nan
         # assert tf.reduce_all(tf.math.is_finite(total_loss_backbone)), "BackBone Loss is NaN or Inf"    
         # add losses to epoch losses
