@@ -63,10 +63,10 @@ def train_first_stage(model: tf.keras.Model,
     
     # 3. Create summary writer
     _train_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
-                                                    log_id=f"{dataset_name}-{str(uuid)}",
+                                                    log_id=f"{dataset_name}-backbone-{str(uuid)}",
                                                     suffix="1-train")
     _test_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
-                                                    log_id=f"{dataset_name}-{str(uuid)}",
+                                                    log_id=f"{dataset_name}-backbone-{str(uuid)}",
                                                     suffix="1-test")
 
     
@@ -188,10 +188,10 @@ def train_second_stage(model: tf.keras.Model,
     
     # 3. Create summary writer
     _train_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
-                                                    log_id=f"{dataset_name}-{str(uuid)}",
+                                                    log_id=f"{dataset_name}-regression_head-{str(uuid)}",
                                                     suffix="2-train")
     _test_summary_writer = common_utils.get_summary_writter(log_dir = "logs/tensorboard",
-                                                    log_id=f"{dataset_name}-{str(uuid)}",
+                                                    log_id=f"{dataset_name}-regression_head-{str(uuid)}",
                                                     suffix="2-test")
     # 3. Loop over the epochs
     
@@ -200,14 +200,14 @@ def train_second_stage(model: tf.keras.Model,
     
     for  epoch in range(epochs):
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
-        model, _per_epoch_train_losses = regression_head_engine.train_step(model=model,
+        model, _per_epoch_train_losses ,train_log = regression_head_engine.train_step(model=model,
                                                                     backBone=backBone,
                                                                     dataloader=train_dataloader,
                                                                     optimizer=optimizer,
                                                                     predicting_homography=predicting_homography)
         
         
-        _per_epoch_test_results = regression_head_engine.test_step(model=model,
+        _per_epoch_test_results ,test_log = regression_head_engine.test_step(model=model,
                                                                     backBone=backBone,
                                                                     dataloader=test_dataloader,
                                                                     predicting_homography=predicting_homography)
@@ -253,5 +253,8 @@ def train_second_stage(model: tf.keras.Model,
         common_utils.save_logs(logs=log_tag,
                                 save_path=f"logs/{dataset_name}",
                                 save_as=f"{log_tag['tag_name']}.json")
+        
+        print(f"[TRAIN] : {train_log}")
+        print(f"[TEST] : {test_log}")
                                 
     return model, log_tag["per_epoch_metrics"] 
