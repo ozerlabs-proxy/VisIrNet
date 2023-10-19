@@ -21,6 +21,7 @@ def train_step(model,
                 dataloader,
                 optimizer,
                 predicting_homography,
+                backbone_loss_function,
                 loss_function_to_use):  
     """
     A train step for the regression head
@@ -87,7 +88,7 @@ def train_step(model,
                                                                                                     template_images,
                                                                                                     warped_fmaps,
                                                                                                     ir_fmaps,
-                                                                                                    loss_function_to_use)
+                                                                                                    backbone_loss_function)
         # loss shouldn't be nan
         # assert tf.reduce_all(tf.math.is_finite(total_loss_backbone)), "total_loss_backbone Loss is NaN"    
         # add losses to epoch losses
