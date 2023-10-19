@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=Vis
+#SBATCH --job-name=skyssim
 #SBATCH --account=users
 #SBATCH --nodes=1
 #SBATCH --nodelist=nova[83]
