@@ -28,7 +28,8 @@ def train_step(model,
     
     print(f"[INFO] training  on {len(dataloader)} pairs")
 
-    for i, batch in tqdm(enumerate(dataloader.take(32))):
+    for i, batch in tqdm(enumerate(dataloader)):
+
     
         input_images, template_images, labels,_instances = batch
         
@@ -88,7 +89,9 @@ def train_step(model,
     # display losses
     # display losses
     log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary.items()])
+
     # print(f"[train_loss] : {log}")
+
     return model, epochs_losses_summary ,log
 
 
@@ -101,7 +104,8 @@ def test_step(model,
     
     print(f"[INFO] testing  on {len(dataloader)} pairs")
     
-    for i, batch in tqdm(enumerate(dataloader.take(32))):
+    for i, batch in tqdm(enumerate(dataloader)):
+
         input_images, template_images, labels,_instances = batch
 
         gt_matrix = DatasetTools.get_ground_truth_homographies(labels)
