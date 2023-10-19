@@ -206,22 +206,22 @@ def train_second_stage(model: tf.keras.Model,
     
     for  epoch in range(epochs):
         print(f"[INFO] Epoch {epoch+1}/{epochs}")
-        model, _per_epoch_train_losses ,train_log = regression_head_engine.train_step(model=model,
-                                                                    backBone=backBone,
-                                                                    dataloader=train_dataloader,
-                                                                    optimizer=optimizer,
-                                                                    predicting_homography=predicting_homography,
-                                                                    backbone_loss_function=backbone_loss_function,
-                                                                    loss_function_to_use=loss_function_to_use)
+        model, _per_epoch_train_losses , train_log = regression_head_engine.train_step(model=model,
+                                                                                            backBone=backBone,
+                                                                                            dataloader=train_dataloader,
+                                                                                            optimizer=optimizer,
+                                                                                            predicting_homography = predicting_homography,
+                                                                                            backbone_loss_function = backbone_loss_function,
+                                                                                            loss_function_to_use = loss_function_to_use)
         
         
         _per_epoch_test_results ,test_log = regression_head_engine.test_step(model=model,
-                                                                    backBone=backBone,
-                                                                    dataloader=test_dataloader,
-                                                                    predicting_homography=predicting_homography,
-                                                                    backbone_loss_function=backbone_loss_function,
-                                                                    loss_function_to_use=loss_function_to_use
-                                                                    )
+                                                                            backBone=backBone,
+                                                                            dataloader=test_dataloader,
+                                                                            predicting_homography = predicting_homography,
+                                                                            backbone_loss_function = backbone_loss_function,
+                                                                            loss_function_to_use = loss_function_to_use
+                                                                            )
         # 6. Save model
         if (epoch+1) % save_frequency == 0:
             hard_tag = str(int((epoch+1)/save_hard_frequency) + 1)

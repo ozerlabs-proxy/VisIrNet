@@ -56,11 +56,12 @@ if gpus:
 import argparse 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--config-file', 
-                        action = "store", 
-                        dest = "config_file",
-                        default = "default_config.json",
-                        help = 'specify config file to load')
+
+parser.add_argument('--config-file', action = "store",  dest = "config_file", default = "default_config.json",help = 'specify config file to load')
+parser.add_argument('--b_loss_function', action = "store",  dest = "b_loss_function", default = None ,help = 'f embedding block loss')
+parser.add_argument('--r_loss_function', action = "store",  dest = "r_loss_function", default = None ,help = 'regression head  loss')
+parser.add_argument('--train_first_stage', action = "store",  dest = "train_first_stage", default = None ,help = 'train first stage')
+parser.add_argument('--train_second_stage', action = "store",  dest = "train_second_stage", default = None ,help = 'train second stage')
 
 input_arguments = parser.parse_args()
 
@@ -70,8 +71,23 @@ configs = ConfigurationParser.getConfigurations(configs_path = 'configs',
                                                 config_file = str(input_arguments.config_file))
 
 
+## if loss functions are passed as arguments, override the ones in the config file
+if input_arguments.b_loss_function is not None:
+    configs = configs._replace(B_LOSS_FUNCTION = str(input_arguments.b_loss_function))
+if input_arguments.r_loss_function is not None:
+    configs = configs._replace(R_LOSS_FUNCTION = str(input_arguments.r_loss_function))
+if input_arguments.train_first_stage is not None:
+    configs = configs._replace(TrainFirstStage = bool(input_arguments.train_first_stage))
+if input_arguments.train_second_stage is not None:
+    configs = configs._replace(TrainSecondStage = bool(input_arguments.train_second_stage))    
+
+    
+
 # print configurations
 ConfigurationParser.printConfigurations(configs)
+
+
+
 
 
 # ## [markdown]
