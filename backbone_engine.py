@@ -29,6 +29,7 @@ def train_step(model,
     print(f"[INFO] training  on {len(dataloader)} pairs")
 
     for i, batch in tqdm(enumerate(dataloader)):
+
     
         input_images, template_images, labels,_instances = batch
         
@@ -63,7 +64,7 @@ def train_step(model,
                     
         # get gradients and backpropagate                
         all_parameters= model.trainable_variables
-        grads = tape.gradient(total_loss, all_parameters)#,unconnected_gradients=tf.UnconnectedGradients.ZERO
+        grads = tape.gradient(total_loss, all_parameters, unconnected_gradients=tf.UnconnectedGradients.ZERO)
 
         grads_are_safe = np.array([ tf.math.is_finite(g).numpy().all() for g in grads ]).all()
         
@@ -88,7 +89,9 @@ def train_step(model,
     # display losses
     # display losses
     log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary.items()])
-    print(f"[train_loss] : {log}")
+
+    # print(f"[train_loss] : {log}")
+
     return model, epochs_losses_summary ,log
 
 
@@ -102,6 +105,7 @@ def test_step(model,
     print(f"[INFO] testing  on {len(dataloader)} pairs")
     
     for i, batch in tqdm(enumerate(dataloader)):
+
         input_images, template_images, labels,_instances = batch
 
         gt_matrix = DatasetTools.get_ground_truth_homographies(labels)
@@ -137,6 +141,6 @@ def test_step(model,
     
     # display losses
     log = " | ".join([str(str(i)+ " :" + str(k)) for i,k in epochs_losses_summary.items()])
-    print(f"[test_loss] : {log}")
+    # print(f"[test_loss] : {log}")
     
     return epochs_losses_summary ,log

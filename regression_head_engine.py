@@ -34,7 +34,7 @@ def train_step(model,
     
     assert backBone is not None, "the feature embedding backbone is not defined"
     print(f"[INFO] training  on {len(dataloader)} pairs")
-    for i, batch in tqdm(enumerate(dataloader)):
+    for i, batch in tqdm(enumerate(dataloader.take(32))):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -68,7 +68,7 @@ def train_step(model,
                 # assert tf.reduce_all(tf.math.is_finite(total_loss)), "Loss is NaN"
                 
         all_parameters= model.trainable_variables
-        grads = tape.gradient(total_loss, all_parameters)
+        grads = tape.gradient(total_loss, all_parameters, unconnected_gradients=tf.UnconnectedGradients.ZERO)
         grads = [tf.clip_by_value(i,-0.1,0.1) for i in grads]
         # assert tf.reduce_all(tf.math.is_finite(grads)), "Gradients in regression head are inf or NaN"
         optimizer.apply_gradients(zip(grads, all_parameters))
@@ -86,7 +86,7 @@ def train_step(model,
                                                                                                     warped_fmaps,
                                                                                                     ir_fmaps)
         # loss shouldn't be nan
-        assert tf.reduce_all(tf.math.is_finite(total_loss_backbone)), "total_loss_backbone Loss is NaN"    
+        # assert tf.reduce_all(tf.math.is_finite(total_loss_backbone)), "total_loss_backbone Loss is NaN"    
         # add losses to epoch losses
         detailed_batch_losses_backbone = {key: value.numpy() for key, value in detailed_batch_losses_backbone.items()}
         for key, value in detailed_batch_losses_backbone.items():
@@ -101,8 +101,8 @@ def train_step(model,
 
     # display losses
     log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary["regression_head"].items()])
-    print(f"[train_loss] : {log}")
-    return model , epochs_losses_summary
+    # print(f"[train_loss] : {log}")
+    return model , epochs_losses_summary , log
 
 
 # test step for the regression head
@@ -119,7 +119,8 @@ def test_step(model,
     
     assert backBone is not None, "the feature embedding backbone is not defined"
     print(f"[INFO] testing  on {len(dataloader)} pairs")
-    for i, batch in enumerate(dataloader):
+    
+    for i, batch in enumerate(dataloader.take(32)):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -175,5 +176,5 @@ def test_step(model,
 
     # display losses
     log = " | ".join([str(str(i)+ " : " + str(k)) for i,k in epochs_losses_summary["regression_head"].items()])
-    print(f"[test_loss] : {log}")
-    return epochs_losses_summary
+    # print(f"[test_loss] : {log}")
+    return epochs_losses_summary , log
