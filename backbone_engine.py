@@ -29,7 +29,7 @@ def train_step(model,
     
     print(f"[INFO] training  on {len(dataloader)} pairs")
 
-    for i, batch in tqdm(enumerate(dataloader.take(16))):
+    for i, batch in tqdm(enumerate(dataloader)):
 
     
         input_images, template_images, labels,_instances = batch
@@ -108,7 +108,7 @@ def test_step(model,
     
     print(f"[INFO] testing  on {len(dataloader)} pairs")
     
-    for i, batch in tqdm(enumerate(dataloader.take(16))):
+    for i, batch in tqdm(enumerate(dataloader)):
 
         input_images, template_images, labels,_instances = batch
 
