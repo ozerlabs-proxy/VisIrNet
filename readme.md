@@ -82,3 +82,10 @@ visualize logs from tensorboard
 conda activate VisIrNet
 tensorboard --logdir logs/tensorboard
 ```
+
+## Notebooks
+
+- [Train Test Flow](notebooks/pipeline.ipynb)
+- [Playground](notebooks/playground.ipynb)
+- [Visualize fmaps of backbone](notebooks/visualizeBackBoneRes.ipynb)
+- [Visualize fmaps of backbone](notebooks/visualizeBackBoneRes.ipynb)
