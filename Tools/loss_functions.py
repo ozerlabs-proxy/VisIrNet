@@ -76,10 +76,10 @@ def ssim_pixel(img_1, img_2):
         img_1= tf.cast(img_1, dtype="float")
         img_2 = tf.cast(img_2, dtype="float")
         
-        ssim = tf.image.ssim(img_1, img_2, max_val=1.0)
+        ssim = tf.cast(tf.reduce_mean(tf.image.ssim(img_1, img_2, max_val=1.0)), dtype="float")
         
         # return tf.reduce_mean(tf.boolean_mask(ssim, tf.math.is_finite(ssim)))
-        return tf.cast( tf.constant(1.0) - tf.reduce_mean(ssim), dtype="float")
+        return tf.cast( tf.constant(1.0) - ssim , dtype="float")
     
     
     
@@ -129,14 +129,15 @@ def get_losses_febackbone(warped_inputs,
         
     
         total_loss_mse = tf.constant(0.0)
-        losses_weights = tf.constant([1,.001,1,1,.0000001,.0000001],dtype="float")
+        losses_weights = tf.constant([1,.001,1,1,.0000001,.0000001], dtype="float")
         losses = tf.convert_to_tensor([_fir_frgb, _fir_Iir, _frgb_Irgb, _fir_Irgb, _frgb_Iir, _Iir_Irgb], dtype="float")
         # losses = [_fir_frgb, _fir_Iir, _frgb_Irgb, _fir_Irgb, _frgb_Iir, _Iir_Irgb]
         losses = tf.math.multiply(losses , losses_weights)
-        total_loss_mse = tf.reduce_sum(tf.boolean_mask(losses, tf.math.is_finite(losses)))
+        # total_loss_mse = tf.reduce_sum(tf.boolean_mask(losses, tf.math.is_finite(losses)))
+        total_loss_mse = tf.reduce_sum(losses)
         #add epsilon safe guard
         # total_loss_mse = tf.convert_to_tensor(tf.keras.backend.epsilon(),dtype="float") + (total_loss_mse if tf.math.is_finite(total_loss_mse) else 0)
-        total_loss_mse = tf.convert_to_tensor(tf.keras.backend.epsilon(),dtype="float") + tf.cast((total_loss_mse if tf.math.is_finite(total_loss_mse) else 0.0),dtype="float")
+        total_loss_mse = tf.reduce_sum(tf.convert_to_tensor(tf.keras.backend.epsilon(),dtype="float") + tf.cast((total_loss_mse if tf.math.is_finite(total_loss_mse) else 0.0) , dtype="float"))
         # create losss dictionary
         
         detailed_batch_losses = {"fir_frgb": _fir_frgb,

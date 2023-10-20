@@ -8,32 +8,5 @@
 
 # conda activate VisIrNet
 
-###################### SKYDATA  ############################
-##>>>>>>>>>>>>>>>>>>>>>>>> skydata backbone <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-python Train.py --config-file skydata_default_config.json --b_loss_function ssim_pixel --train_first_stage True 
-# python Train.py --config-file skydata_default_config.json --b_loss_function mse_pixel  --train_first_stage True
-# python Train.py --config-file skydata_default_config.json --b_loss_function mae_pixel  --train_first_stage True
-# python Train.py --config-file skydata_default_config.json --b_loss_function sse_pixel  --train_first_stage True
-
-##>>>>>>>>>>>>>>>>>>>>>>>> regression head  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-# python Train.py --config-file skydata_default_config.json --b_loss_function ssim_pixel   --train_second_stage True --r_loss_function l2_homography_loss
-# python Train.py --config-file skydata_default_config.json --b_loss_function mse_pixel  --train_second_stage True --r_loss_function l2_homography_loss
-# python Train.py --config-file skydata_default_config.json --b_loss_function mae_pixel  --train_second_stage True --r_loss_function l2_homography_loss
-# python Train.py --config-file skydata_default_config.json --b_loss_function sse_pixel  --train_second_stage True --r_loss_function l2_homography_loss
-
-
-
-# ###################### VEDAI  ############################
-# ##>>>>>>>>>>>>>>>>>>>>>>>> veai backbone <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-# python Train.py --config-file vedai_default_config.json --b_loss_function ssim_pixel --train_first_stage True 
-# # python Train.py --config-file vedai_default_config.json --b_loss_function mse_pixel  --train_first_stage True
-# # python Train.py --config-file vedai_default_config.json --b_loss_function mae_pixel  --train_first_stage True
-# # python Train.py --config-file vedai_default_config.json --b_loss_function sse_pixel  --train_first_stage True
-
-# ##>>>>>>>>>>>>>>>>>>>>>>>> regression head  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-# python Train.py --config-file vedai_default_config.json --b_loss_function ssim_pixel   --train_second_stage True --r_loss_function l2_homography_loss
-# # python Train.py --config-file vedai_default_config.json --b_loss_function mse_pixel  --train_second_stage True --r_loss_function l2_homography_loss
-# # python Train.py --config-file vedai_default_config.json --b_loss_function mae_pixel  --train_second_stage True --r_loss_function l2_homography_loss
-# # python Train.py --config-file vedai_default_config.json --b_loss_function sse_pixel  --train_second_stage True --r_loss_function l2_homography_loss
-
+nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function mse_pixel  --train_first_stage True
 
