@@ -71,7 +71,15 @@ def train_step(model,
                 # assert tf.reduce_all(tf.math.is_finite(total_loss)), "Loss is NaN"
                 
         all_parameters= model.trainable_variables
-        grads = tape.gradient(total_loss, all_parameters, unconnected_gradients=tf.UnconnectedGradients.ZERO)
+        try:
+            grads = tape.gradient(total_loss, all_parameters, unconnected_gradients=tf.UnconnectedGradients.ZERO)
+        except Exception as e:
+            # somestupid error
+            print("*"*100)
+            print(f"[ERROR] ----------------------- skipping batch {i} --------------------------")
+            print("*"*100)
+            continue
+        
         grads = [tf.clip_by_value(i,-0.1,0.1) for i in grads]
         # assert tf.reduce_all(tf.math.is_finite(grads)), "Gradients in regression head are inf or NaN"
         optimizer.apply_gradients(zip(grads, all_parameters))

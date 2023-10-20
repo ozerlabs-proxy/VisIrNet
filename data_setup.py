@@ -43,8 +43,8 @@ def create_dataloaders(
     test_dataset = Dataset(dataset = dataset,
                             split="val").dataset
     
-    train_dataloader= train_dataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
-    test_dataloader = test_dataset.batch(BATCH_SIZE)
+    train_dataloader= train_dataset.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE, drop_remainder=True)
+    test_dataloader = test_dataset.batch(BATCH_SIZE, drop_remainder=True)
     
     print(f"dataset: {dataset}")
     print(f"BATCH_SIZE: {BATCH_SIZE}")

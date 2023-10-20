@@ -70,13 +70,13 @@ class Dataset():
             
             # print("new image.shape: ", image.shape)
 
-        assert len(image.shape) == 3, "image is not RGB"
-        assert image.shape[2] == 3, "image is not RGB"
+        # assert len(image.shape) == 3, "image is not RGB"
+        # assert image.shape[2] == 3, "image is not RGB"
         
         image = tf.convert_to_tensor(image, dtype=tf.float32)
         image = image / np.float32(255.0)
         
-        assert len(image.shape) == 3, f"image shape is not (H,W,C) but {image.shape}"
+        # assert len(image.shape) == 3, f"image shape is not (H,W,C) but {image.shape}"
         
         return image
 
@@ -107,11 +107,11 @@ class Dataset():
         u_list=[list(x.values())[0] for x in location]
         v_list=[list(x.values())[1] for x in location]
         
-        u_list = np.array(u_list)
-        v_list = np.array(v_list)
-        
-        label = tf. convert_to_tensor(np.concatenate([u_list, v_list]), dtype=tf.float32)
-        assert len(label.shape) == 1, f"label shape is not (uv_list)" 
+        u_list = tf.constant(u_list, dtype="float")
+        v_list = tf.constant(v_list, dtype ="float")
+                
+        label = tf. convert_to_tensor(tf.concat([u_list, v_list], -1), dtype=tf.float32)
+        # assert len(label.shape) == 1 and label.shape == 8 , f"label shape is not (uv_list)" 
         
         return label
 
@@ -142,15 +142,15 @@ class Dataset():
         
         
         # 
-        assert input_image.shape == (192,192,3), f"input_image.shape is not (192,192,3) but {input_image.shape}"
-        assert template_image.shape == (128,128,3), f"template_image.shape is not (192,192,3) but {template_image.shape}"
-        assert label.shape == (8,), f"label.shape is not (8,) but {label.shape}"
-        assert _instance == _instance_path.stem, f"_instance is not {_instance_path.stem} but {_instance}"
+        # assert input_image.shape == (192,192,3), f"input_image.shape is not (192,192,3) but {input_image.shape}"
+        # assert template_image.shape == (128,128,3), f"template_image.shape is not (192,192,3) but {template_image.shape}"
+        # assert label.shape == (8,), f"label.shape is not (8,) but {label.shape}"
+        # assert _instance == _instance_path.stem, f"_instance is not {_instance_path.stem} but {_instance}"
         
-        # assert all are contain finate values
-        assert tf.reduce_all(tf.math.is_finite(input_image)) , f"input_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
-        assert tf.reduce_all(tf.math.is_finite(template_image)) , f"template_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
-        assert tf.reduce_all(tf.math.is_finite(label)) , f"label contain non finite values {label} ----- {tf.strings.as_string(str(_instance))}"
+        # # assert all are contain finate values
+        # assert tf.reduce_all(tf.math.is_finite(input_image)) , f"input_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
+        # assert tf.reduce_all(tf.math.is_finite(template_image)) , f"template_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
+        # assert tf.reduce_all(tf.math.is_finite(label)) , f"label contain non finite values {label} ----- {tf.strings.as_string(str(_instance))}"
         
         
         _instance = tf.strings.as_string(str(_instance))

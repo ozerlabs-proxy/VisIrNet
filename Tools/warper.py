@@ -152,7 +152,15 @@ class Warper():
 
     pixel_coords = self.meshgrid_after(self.coords, matrix)
 
+    input_feature_shape = input_feature.get_shape().as_list()
 
    
     output_img = self.bilinear_sampler(input_feature, pixel_coords )
+    
+    new_input_feature_shape = [input_feature_shape[0],self.height_template,self.width_template,input_feature_shape[3]]
+    output_img = tf.reshape(output_img , new_input_feature_shape)
+    output_img = tf.cast(output_img,tf.float32)
+    
+    assert output_img.get_shape().as_list() == new_input_feature_shape, "output_img shape is not (batch_size, height, width, channels)"
+    
     return output_img

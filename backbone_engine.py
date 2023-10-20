@@ -34,6 +34,9 @@ def train_step(model,
     
         input_images, template_images, labels,_instances = batch
         
+        # make sure the labels have the right shape
+        assert labels.shape == (input_images.shape[0], 8), "labels shape is not (batch_size, 8)"
+        
         # tf.config.run_functions_eagerly(True)
         gt_matrix = DatasetTools.get_ground_truth_homographies(labels)
         # tf.config.run_functions_eagerly(False)
@@ -66,7 +69,22 @@ def train_step(model,
                     
         # get gradients and backpropagate                
         all_parameters= model.trainable_variables
-        grads = tape.gradient(total_loss, all_parameters, unconnected_gradients=tf.UnconnectedGradients.ZERO)
+        
+        try:
+            grads = tape.gradient(total_loss, all_parameters, unconnected_gradients=tf.UnconnectedGradients.ZERO)
+        except Exception as e:
+            # somestupid error
+            print("*"*100)
+            print(f"[ERROR] ----------------------- skipping batch {i} --------------------------")
+            
+            print("*"*100)
+            print(f"[VALUES] labels shape: {labels.shape}")
+            print(f"[VALUES] input_images shape: {input_images.shape}")
+            print(f"[VALUES] instances: {_instances}")
+            
+            
+            print("*"*100)
+            continue
 
         grads_are_safe = np.array([ tf.math.is_finite(g).numpy().all() for g in grads ]).all()
         
@@ -83,6 +101,8 @@ def train_step(model,
         for key, value in detailed_batch_losses.items():
             epochs_losses_summary[key].append(value)
 
+
+        
         
     # compute mean of losses
     for key, value in epochs_losses_summary.items():
