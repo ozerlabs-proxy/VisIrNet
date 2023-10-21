@@ -108,12 +108,41 @@ which ever used you have access to other derrivations
 - [x] l1_corners_loss
 - [x] l2_corners_loss
 
-## TRACK TRAININGs
+## TRACK EXPERIMENTS
 
-### BACKBONE
+### BACKBONEs 
+a table of backbones with diferent losses and datasets
 
-#### SkyData
-- [ ] mse_pixel
-- [ ] mae_pixel
-- [ ] sse_pixel
-- [x] ssim_pixel
+|-----------|SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
+|-----------|-----------|-------|---------------|-----------|-------|
+| mse_pixel | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| mae_pixel | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |    
+| sse_pixel | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| ssim_pixel | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+
+
+### regression head
+for each dataset there will be regression head trained on different backbones with different regression losses
+
+|B_loss     | R_loss | SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
+|--------   |--------|------------|-------|---------------|-----------|-------|
+| mse_pixel | l1_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| mae_pixel | l1_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| sse_pixel | l1_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| ssim_pixel| l1_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   | 
+|-----------|-----------------|-----------|-------|---------------|-----------|-------|
+| mse_pixel | l2_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| mae_pixel | l2_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| sse_pixel | l2_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| ssim_pixel| l2_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+|-----------|-----------------|-----------|-------|---------------|-----------|-------|
+| mse_pixel | l1_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| mae_pixel | l1_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| sse_pixel | l1_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| ssim_pixel| l1_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+|-----------|-----------------|-----------|-------|---------------|-----------|-------|
+| mse_pixel | l2_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| mae_pixel | l2_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| sse_pixel | l2_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| ssim_pixel| l2_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+|-----------|-----------------|-----------|-------|---------------|-----------|-------|
