@@ -93,10 +93,10 @@ tensorboard --logdir logs/tensorboard
 
 ## loss functions logs
 ### backbone losses choice
-- [x] mean_squared_error (mse_pixel) "l2"
-- [x] mean_absolute_error (mae_pixel) "l1"
-- [x] sum_squared_error (sse_pixel)
-- [x] structural_similarity (ssim_pixel)
+- &check; mean_squared_error (mse_pixel) "l2"
+- &check; mean_absolute_error (mae_pixel) "l1"
+- &check; sum_squared_error (sse_pixel)
+- &check; structural_similarity (ssim_pixel)
 
 
 ### registration losses choice
@@ -113,36 +113,44 @@ which ever used you have access to other derrivations
 ### BACKBONEs 
 a table of backbones with diferent losses and datasets
 
-|-----------|SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
+|           |SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
 |-----------|-----------|-------|---------------|-----------|-------|
-| mse_pixel | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| mae_pixel | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |    
-| sse_pixel | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| ssim_pixel | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| mse_pixel | &check;       | -   | -           | -       | -   |
+| mae_pixel | &check;       | -   | -           | -       | -   |    
+| sse_pixel | &check;       | -   | -           | -       | -   |
+| ssim_pixel| &check;       | -   | -           | -       | -   |
 
 
 ### regression head
 for each dataset there will be regression head trained on different backbones with different regression losses
 
-|B_loss     | R_loss | SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
-|--------   |--------|------------|-------|---------------|-----------|-------|
-| mse_pixel | l1_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| mae_pixel | l1_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| sse_pixel | l1_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| ssim_pixel| l1_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   | 
+| Backbone  | R_loss | SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
+|-----------|--------|------------|-------|---------------|-----------|-------|
+| mse_pixel | l1_corners_loss | &check;       | -   | -           | -       | -   |
+| mae_pixel | l1_corners_loss | &check;       | -   | -           | -       | -   |
+| sse_pixel | l1_corners_loss | &check;       | -   | -           | -       | -   |
+| ssim_pixel| l1_corners_loss | &check;       | -   | -           | -       | -   | 
+***
+
+| Backbone  | R_loss | SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
 |-----------|-----------------|-----------|-------|---------------|-----------|-------|
-| mse_pixel | l2_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| mae_pixel | l2_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| sse_pixel | l2_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| ssim_pixel| l2_corners_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| mse_pixel | l2_corners_loss | &check;       | -   | -           | -       | -   |
+| mae_pixel | l2_corners_loss | &check;       | -   | -           | -       | -   |
+| sse_pixel | l2_corners_loss | &check;       | -   | -           | -       | -   |
+| ssim_pixel| l2_corners_loss | &check;       | -   | -           | -       | -   |
+***
+
+| Backbone  | R_loss | SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
 |-----------|-----------------|-----------|-------|---------------|-----------|-------|
-| mse_pixel | l1_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| mae_pixel | l1_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| sse_pixel | l1_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| ssim_pixel| l1_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
+| mse_pixel | l1_homography_loss | &check;       | -   | -           | -       | -   |
+| mae_pixel | l1_homography_loss | &check;       | -   | -           | -       | -   |
+| sse_pixel | l1_homography_loss | &check;       | -   | -           | -       | -   |
+| ssim_pixel| l1_homography_loss | &check;       | -   | -           | -       | -   |
+***
+| Backbone  | R_loss | SkyData    |VEDAI  |GoogleEarth    |GoogleMap  |MSCOCO |
 |-----------|-----------------|-----------|-------|---------------|-----------|-------|
-| mse_pixel | l2_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| mae_pixel | l2_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| sse_pixel | l2_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-| ssim_pixel| l2_homography_loss | [x]       | [ ]   | [ ]           | [ ]       | [ ]   |
-|-----------|-----------------|-----------|-------|---------------|-----------|-------|
+| mse_pixel | l2_homography_loss | &check;       | -   | -           | -       | -   |
+| mae_pixel | l2_homography_loss | &check;       | -   | -           | -       | -   |
+| sse_pixel | l2_homography_loss | &check;       | -   | -           | -       | -   |
+| ssim_pixel| l2_homography_loss | &check;       | -   | -           | -       | -   |
+
