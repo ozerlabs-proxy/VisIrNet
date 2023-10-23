@@ -180,7 +180,7 @@ def train_second_stage(model: tf.keras.Model,
         
     # load the feature embedding backbone
     if featureEmbeddingBackBone is not None:
-        pattern = f"*{backbone_loss_function}-featureEmbeddingBackBone*" if str(featureEmbeddingBackBone)=="latest" else f"*{featureEmbeddingBackBone}*"
+        pattern = f"*{backbone_loss_function}-featureEmbeddingBackbone*" if str(featureEmbeddingBackBone)=="latest" else f"*{featureEmbeddingBackBone}*"
         model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
         log_tag["featureEmbeddingBackbone"] = str(model_name)
         backBone = common_utils.load_model(model_name)
