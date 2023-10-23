@@ -27,7 +27,7 @@
     "B_save_path"  :  null,
     "B_save_as" : "featureEmbeddingBackBone",
     "B_save_frequency" : 1,
-    "B_save_hard_frequency" : 2,
+    "B_save_hard_frequency" : 10,
 
     "R_initial_learning_rate"  :  0.001,
     "R_decay_steps"  :  1000,
@@ -38,7 +38,7 @@
     "R_save_path"  :  null,
     "R_save_as"  :  "regressionHead",
     "R_save_frequency"  :  1,
-    "R_save_hard_frequency" : 2,
+    "R_save_hard_frequency" : 10,
     "R_predicting_homography" : true,
     "R_LOSS_FUNCTION" : "l2_homography_loss" 
 
