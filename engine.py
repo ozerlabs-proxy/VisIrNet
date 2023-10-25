@@ -33,6 +33,8 @@ def train_first_stage(model: tf.keras.Model,
                     loss_function="mse_pixel",
                     uuid=""):
     assert save_path is not None, "save_path is None"
+    
+    save_path = save_path+ f"/{loss_function}"
     # create a tag for the training
     log_tag = {
                     "model-name": model.name,
@@ -150,6 +152,8 @@ def train_second_stage(model: tf.keras.Model,
                         loss_function_to_use="l2_homography_loss",
                         uuid=""):
     assert save_path is not None, "save_path is None"
+    save_path_backbone = save_path+ f"/{backbone_loss_function}"
+    save_path = save_path+ f"/{loss_function_to_use}"
     homography_based = "homography" if predicting_homography else "corners"
 
     # create a tag for the training
@@ -181,7 +185,7 @@ def train_second_stage(model: tf.keras.Model,
     # load the feature embedding backbone
     if featureEmbeddingBackBone is not None:
         pattern = f"*{backbone_loss_function}-featureEmbeddingBackbone*" if str(featureEmbeddingBackBone)=="latest" else f"*{featureEmbeddingBackBone}*"
-        model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
+        model_name = common_utils.latest_file(Path(save_path_backbone), pattern=pattern)
         log_tag["featureEmbeddingBackbone"] = str(model_name)
         backBone = common_utils.load_model(model_name)
     
