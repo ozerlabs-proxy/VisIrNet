@@ -3,7 +3,7 @@
     "TrainFirstStage" : false,
     "TrainSecondStage" : false,
     "B_R_uuid" : null,
-    "BATCH_SIZE" :16,
+    "BATCH_SIZE" :8,
     "SHUFFLE_BUFFER_SIZE" : 1000,
 
     "RGB_INPUTS_SHAPE" : [192,192,3],
@@ -21,7 +21,7 @@
     "B_initial_learning_rate"  :  0.001,
     "B_decay_steps" : 1000,
     "B_decay_rate" : 0.96,
-    "B_NUM_EPOCHS"  :  2,
+    "B_NUM_EPOCHS"  :  50,
 
     "B_from_checkpoint"  :  null,
     "B_save_path"  :  null,
@@ -32,7 +32,7 @@
     "R_initial_learning_rate"  :  0.001,
     "R_decay_steps"  :  1000,
     "R_decay_rate"  :  0.96,
-    "R_NUM_EPOCHS"  :  2,
+    "R_NUM_EPOCHS"  :  50,
     "R_featureEmbeddingBackBone"  :  "latest",
     "R_from_checkpoint"  :  null,
     "R_save_path"  :  null,

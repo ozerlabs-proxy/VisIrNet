@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#SBATCH --job-name=sky_mae_pixel
+#SBATCH --job-name=sky_sse_pixel
 #SBATCH --account=users
 #SBATCH --nodes=1
-#SBATCH --nodelist=nova[102]
+#SBATCH --nodelist=nova[83]
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --partition=main
@@ -42,8 +42,8 @@ echo "--**Training**--"
 ##>>>>>>>>>>>>>>>>>>>>>>>> skydata backbone <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 # srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function ssim_pixel --train_first_stage True 
 # srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function mse_pixel  --train_first_stage True
-srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function mae_pixel  --train_first_stage True
-# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function sse_pixel  --train_first_stage True
+# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function mae_pixel  --train_first_stage True
+srun nvidia-smi && python Train.py --config-file skydata_default_config.json --b_loss_function sse_pixel  --train_first_stage True
 
 
 ## <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<DATASETS iNTEGRITY>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>#
