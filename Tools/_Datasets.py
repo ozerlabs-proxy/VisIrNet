@@ -127,6 +127,8 @@ class Dataset():
         # assuming _instance is a string with the format "00001"
         # 
         # _instance = tf.strings.as_string(_instance).numpy().decode("utf-8")
+        
+        
         _instance_path = Path(tf.strings.as_string(_instance).numpy().decode("utf-8"))
         _instance = _instance_path.stem
         _extension = _instance_path.suffix
@@ -151,8 +153,6 @@ class Dataset():
         # assert tf.reduce_all(tf.math.is_finite(input_image)) , f"input_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
         # assert tf.reduce_all(tf.math.is_finite(template_image)) , f"template_image contain non finite values ----- {tf.strings.as_string(str(_instance))}"
         # assert tf.reduce_all(tf.math.is_finite(label)) , f"label contain non finite values {label} ----- {tf.strings.as_string(str(_instance))}"
-        
-        
-        _instance = tf.strings.as_string(str(_instance))
+        _instance = tf.constant(str(_instance)+"" , dtype=tf.string)
         
         return tf.cast(input_image,dtype="float"), tf.cast(template_image,dtype="float"), tf.cast(label, dtype="float") , _instance

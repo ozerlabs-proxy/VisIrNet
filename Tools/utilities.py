@@ -1,8 +1,9 @@
 import json
 import numpy as np
-from pathlib import Path
 import tensorflow as tf
 from pathlib import Path
+from tqdm.auto import tqdm
+import matplotlib.pyplot as plt
 
 def tensor_has_nan(some_tensor):
         """
@@ -138,3 +139,58 @@ def tb_write_summary(_summary_writer,
                         # print(f"key: {key}, value: {value}")
                         tf.summary.scalar(f"{key}", value, epoch)
                         _summary_writer.flush()
+                        
+
+def plot_showcase_and_save_backbone_results( all_data_to_plot,
+                                        _instances,
+                                        save_path = "resources/backbone-showcase",
+                                        dataset_name = "SkyData",
+                                        loss_functions_used = "mse_pixel"
+                                        ):
+
+    
+
+    # input_images = all_data_to_plot[0]
+    template_images = all_data_to_plot[1]
+    warped_inputs = all_data_to_plot[2]
+    # rgb_fmaps = all_data_to_plot[4]
+    ir_fmaps = all_data_to_plot[5]
+    warped_fmaps = all_data_to_plot[6]
+
+    for i_th in range(len(all_data_to_plot[0])):
+        data_to_plot = {k:np.array(v[i_th]).clip(0,1) for k,v in all_data_to_plot.items()}
+        
+        summed_data = {
+                3: 0.9 * warped_inputs[i_th] + .2 * warped_fmaps[i_th],
+                7: 0.05 *template_images[i_th] + 1 *  tf.cast(ir_fmaps[i_th],tf.float32)
+        }
+        data_to_plot.update(summed_data)
+        
+        fig, axs = plt.subplots(2, 4, figsize=(8, 5), constrained_layout=True)
+        axs = axs.ravel()
+
+        # fig = plt.figure(figsize=(20, 20))
+        # axs = fig.subplots(3, 2)
+        titles=["input_images","template_images","warped_inputs","summed_rgb","rgb_fmaps","ir_fmaps","warped_fmaps","summed_ir"]
+        for i, ax in enumerate(axs):
+            ax.axis('off')
+            ax.set_title(titles[i])
+            
+
+
+        for i, data_i in data_to_plot.items():
+            axs[i].imshow(np.array(data_i).clip(0,1))
+        # fig.tight_layout()
+        # plt.show()
+
+        #saving showcase
+        
+        save_path = Path(f"{save_path}/{dataset_name}/{loss_functions_used}")
+        save_name = f"{_instances.numpy()[i_th].decode('utf-8')}.png"
+        save_path.mkdir(parents=True, exist_ok=True)
+        
+        save_as= str(save_path/save_name)
+        
+        plt.savefig(save_as, dpi=300, bbox_inches='tight')
+        plt.close()
+            

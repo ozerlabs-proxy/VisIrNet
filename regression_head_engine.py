@@ -53,16 +53,21 @@ def train_step(model,
         
         rgb_fmaps , ir_fmaps = backBone.call((input_images, template_images),training=False)
         
+
+        # weighted sum if needed 
+        summed_rgb_fmaps = tf.constant(1.0) * tf.cast(input_images,"float")   + tf.constant(0.2) * tf.cast(rgb_fmaps,"float")
+        summed_ir_fmaps =  tf.constant(0.2) * tf.cast(template_images,"float") + tf.constant(1.0) *  tf.cast(ir_fmaps,'float')
         # padd the ir_fmaps to match the shape of the rgb_fmaps
+        ir_fmaps_padded = backboneUtils.get_padded_fmaps(fmaps=summed_ir_fmaps, desired_shape = rgb_fmaps.shape)
+
         
-        
-        ir_fmaps_padded = backboneUtils.get_padded_fmaps(fmaps=ir_fmaps, desired_shape = rgb_fmaps.shape)
         # concatenate the rgb_fmaps and ir_fmaps
-        concatenated_fmaps = tf.concat([rgb_fmaps, ir_fmaps_padded], axis=-1)
+        concatenated_fmaps = tf.concat([summed_rgb_fmaps, ir_fmaps_padded], axis=-1)
         
         with tf.GradientTape() as tape:
                 predictions = model.call((concatenated_fmaps), training=True)
                 
+                tape.watch(predictions)
                 total_loss , detailed_batch_losses = loss_functions.get_losses_regression_head( predictions = predictions, 
                                                                                                 ground_truth_corners = labels,
                                                                                                 gt_matrix = gt_matrix, 
@@ -134,7 +139,7 @@ def test_step(model,
     assert backBone is not None, "the feature embedding backbone is not defined"
     print(f"[INFO] testing  on {len(dataloader)} pairs")
     
-    for i, batch in enumerate(dataloader):
+    for i, batch in tqdm(enumerate(dataloader)):
         input_images, template_images, labels,_instances = batch
         
         # add batch dim if shape is not (batch_size, height, width, channels)
@@ -153,10 +158,15 @@ def test_step(model,
         
         # padd the ir_fmaps to match the shape of the rgb_fmaps
         
+        # weighted sum if needed 
+        summed_rgb_fmaps = tf.constant(1.0) * tf.cast(input_images,"float")   + tf.constant(0.2) * tf.cast(rgb_fmaps,"float")
+        summed_ir_fmaps =  tf.constant(0.2) * tf.cast(template_images,"float") + tf.constant(1.0) *  tf.cast(ir_fmaps,'float')
+        # padd the ir_fmaps to match the shape of the rgb_fmaps
+        ir_fmaps_padded = backboneUtils.get_padded_fmaps(fmaps=summed_ir_fmaps, desired_shape = rgb_fmaps.shape)
+
         
-        ir_fmaps_padded = backboneUtils.get_padded_fmaps(fmaps=ir_fmaps, desired_shape = rgb_fmaps.shape)
         # concatenate the rgb_fmaps and ir_fmaps
-        concatenated_fmaps = tf.concat([rgb_fmaps, ir_fmaps_padded], axis=-1)
+        concatenated_fmaps = tf.concat([summed_rgb_fmaps, ir_fmaps_padded], axis=-1)
         
 
         predictions = model.call((concatenated_fmaps),training=False)
