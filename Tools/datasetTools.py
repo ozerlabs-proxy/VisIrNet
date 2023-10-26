@@ -167,13 +167,13 @@ def homographies_to_corners(prediction_matrices):
     # assert len(prediction_matrices.shape) == 3, "prediction_matrices should be [batch_size, 3,3]"
     batch_size = prediction_matrices.shape[0]
     # get initial corners
-    initial_corners = np.asarray([[0,0,1],[127,0,1],[0,127,1],[127,127,1]])
-    initial_corners = np.transpose(initial_corners)
-    initial_corners = np.expand_dims(initial_corners, axis=0)
-    initial_corners = np.tile(initial_corners, [batch_size, 1, 1]).astype(np.float32)
-    initial_corners = tf.dtypes.cast(initial_corners, tf.float32)
+    initial_corners = tf.constant([[0,0,1],[127,0,1],[0,127,1],[127,127,1]])
+    initial_corners = tf.transpose(initial_corners)
+    initial_corners = tf.expand_dims(initial_corners, axis=0)
+    initial_corners = tf.cast(tf.tile(initial_corners, [batch_size, 1, 1]), "float")
+    initial_corners = tf.cast(initial_corners, tf.float32)
 
-    prediction_matrices = tf.dtypes.cast(prediction_matrices, tf.float32)
+    prediction_matrices = tf.cast(prediction_matrices, tf.float32)
     new_four_points = tf.matmul(prediction_matrices, initial_corners)
 
     new_four_points_scale = new_four_points[:, 2:, :]
@@ -229,4 +229,4 @@ def corners_to_homographies(prediction_corners):
     dividend = tf.expand_dims(dividend, axis=-1)
     homography_matrices = tf.divide(homography_matrices,dividend)
     # assert tf.reduce_all(tf.math.is_finite(homography_matrices)), "homography matrices have nan values"
-    return homography_matrices
+    return tf.cast(homography_matrices, "float")

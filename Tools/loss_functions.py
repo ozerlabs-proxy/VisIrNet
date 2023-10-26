@@ -151,7 +151,7 @@ def get_losses_febackbone(warped_inputs,
 
         return total_loss_mse , detailed_batch_losses
     
-    
+@tf.function    
 def get_losses_regression_head(predictions, 
                                 ground_truth_corners,
                                 gt_matrix , 
@@ -181,7 +181,8 @@ def get_losses_regression_head(predictions,
         # corners are already predicted
         prediction_corners = predictions
         # convert corners to homographies
-        prediction_matrices = DatasetTools.corners_to_homographies(prediction_corners)
+        with tf.device("/cpu:0"):
+            prediction_matrices = DatasetTools.corners_to_homographies(prediction_corners)
     
 
     var1_intermidiate = tf.math.abs(prediction_matrices - gt_matrix)
