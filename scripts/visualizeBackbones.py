@@ -72,151 +72,107 @@ configs = ConfigurationParser.getConfigurations(configs_path = 'configs',
 # ##
 import data_setup
 
+import model_setup
+import Utils
+
+
+import Tools.utilities as common_utils
+# ##
+import Tools.loss_functions as loss_functions
+import Tools.datasetTools as DatasetTools
+
+
+def visualize_and_save(samples_to_visualize=10,
+                       model = None,
+                       dataloader = None,
+                       loss_functions_used = None,
+                       save_path = None,
+                       dataset_name = None,
+                       ):
+        
+    # ##
+    for batch in tqdm(dataloader.take(samples_to_visualize)):
+        input_images, template_images, labels,_instances = batch
+        
+        gt_matrix = DatasetTools.get_ground_truth_homographies(labels)
+        warped_inputs, _ = DatasetTools._get_warped_sampled(images = input_images,  homography_matrices = gt_matrix)
+        
+        rgb_fmaps , ir_fmaps = model.call((input_images, template_images), training=False)
+        
+        
+        warped_fmaps,_ = DatasetTools._get_warped_sampled( images = rgb_fmaps, 
+                                                        homography_matrices = gt_matrix)
+
+
+        total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone( warped_inputs,
+                                                                                    template_images,
+                                                                                    warped_fmaps,
+                                                                                    ir_fmaps,
+                                                                                    loss_functions_used)
+
+
+
+        all_data_to_plot = {
+                            0:input_images,
+                            1:template_images,
+                            2:warped_inputs,
+                            4:rgb_fmaps,
+                            5:ir_fmaps,
+                            6:warped_fmaps,
+                                        }
+        
+        common_utils.plot_showcase_and_save_backbone_results( all_data_to_plot,
+                                                _instances,
+                                                save_path = save_path if save_path else "resources/backbone-showcase",
+                                                dataset_name = configs.dataset,
+                                                loss_functions_used = loss_functions_used
+                                                )
+        
+
+
+
+### setup dataloaders 
 train_dataloader,test_dataloader = data_setup.create_dataloaders(dataset=configs.dataset, 
                                                                 BATCH_SIZE=1,
                                                                 SHUFFLE_BUFFER_SIZE=configs.SHUFFLE_BUFFER_SIZE
                                                                 )
 
 len(train_dataloader), len(test_dataloader)
-#
-
-# ## [markdown]
-# ## **Model**
-
-# ##
-## model name to load
-import model_setup
-import Utils
 
 
-import Tools.utilities as common_utils
+### vis loop 
 
-loss_functions_used ="ssim_pixel"
-from_checkpoint = "SkyData-ssim_pixel-featureEmbeddingBackbone-1-50-0ca7a287425746488530f7ee0e517ab7-5.keras"
-save_path = f"models/{configs.dataset}"
+samples_to_visualize = 10
+# for loss_function_used in ["mse_pixel","ssim_pixel","mae_pixel","sse_pixel"]:
+for loss_function_used in ["sse_pixel"]:
+    print(f"[INFO] visualizing {loss_function_used} ...")
+    ### setup model
+    # from_checkpoint = "SkyData-sse_pixel-featureEmbeddingBackbone-1-50-c139e1fb63f240789439f2bfc7cba603-1.keras"
+    from_checkpoint = "latest"
+    save_path = f"models/{configs.dataset}/{loss_function_used}"
 
-pattern = f"*{loss_functions_used}-featureEmbeddingBackbone*" if str(from_checkpoint)=="latest" else f"*{from_checkpoint}*"
+    pattern = f"*{loss_function_used}-featureEmbeddingBackbone*" if str(from_checkpoint)=="latest" else f"*{from_checkpoint}*"
 
-try:
-    model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
-    model = common_utils.load_model(model_name)
-except Exception as e:
-    print(e)
-    print("error loading model")
-    exit()
-
-# ##
-
-## 
-
-def plot_showcase_and_save_backbone_results( all_data_to_plot,
-                                        _instances,
-                                        save_path = "resources/backbone-showcase",
-                                        dataset_name = "SkyData",
-                                        loss_functions_used = "mse_pixel"
-                                        ):
-
-    
-
-    # input_images = all_data_to_plot[0]
-    template_images = all_data_to_plot[1]
-    warped_inputs = all_data_to_plot[2]
-    # rgb_fmaps = all_data_to_plot[4]
-    ir_fmaps = all_data_to_plot[5]
-    warped_fmaps = all_data_to_plot[6]
-
-    for i_th in range(len(all_data_to_plot[0])):
-        data_to_plot = {k:np.array(v[i_th]).clip(0,1) for k,v in all_data_to_plot.items()}
+    try:
+        model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
+        model = common_utils.load_model(model_name)
+    except Exception as e:
+        print(e)
+        print("error loading model")
+        exit()
         
-        summed_data = {
-                3: 0.9 * warped_inputs[i_th] + .2 * warped_fmaps[i_th],
-                7: 0.05 *template_images[i_th] + 1 *  tf.cast(ir_fmaps[i_th],tf.float32)
-        }
-        data_to_plot.update(summed_data)
-        
-        fig, axs = plt.subplots(2, 4, figsize=(8, 5), constrained_layout=True)
-        axs = axs.ravel()
-
-        # fig = plt.figure(figsize=(20, 20))
-        # axs = fig.subplots(3, 2)
-        titles=["input_images","template_images","warped_inputs","summed_rgb","rgb_fmaps","ir_fmaps","warped_fmaps","summed_ir"]
-        for i, ax in enumerate(axs):
-            ax.axis('off')
-            ax.set_title(titles[i])
-            
-
-
-        for i, data_i in data_to_plot.items():
-            axs[i].imshow(np.array(data_i).clip(0,1))
-        # fig.tight_layout()
-        # plt.show()
-
-        #saving showcase
-        
-        save_path = Path(f"{save_path}/{dataset_name}/{loss_functions_used}")
-        save_name = f"{_instances.numpy()[i_th].decode('utf-8')}.png"
-        save_path.mkdir(parents=True, exist_ok=True)
-        
-        save_as= str(save_path/save_name)
-        
-        plt.savefig(save_as, dpi=300, bbox_inches='tight')
-        plt.close()
-            
-
-# ## [markdown]
-# ## **Forward Pass**
-# 
-
-# ##
-samples_to_visualize = 20
-
-# ##
-import Tools.loss_functions as loss_functions
-import Tools.datasetTools as DatasetTools
-
-# ##
-for batch in train_dataloader.take(samples_to_visualize):
-    input_images, template_images, labels,_instances = batch
-    
-    gt_matrix = DatasetTools.get_ground_truth_homographies(labels)
-    warped_inputs, _ = DatasetTools._get_warped_sampled(images = input_images,  homography_matrices = gt_matrix)
-    
-    rgb_fmaps , ir_fmaps = model.call((input_images, template_images), training=False)
-    
-    
-    warped_fmaps,_ = DatasetTools._get_warped_sampled( images = rgb_fmaps, 
-                                                    homography_matrices = gt_matrix)
-
-
-    total_loss , detailed_batch_losses = loss_functions.get_losses_febackbone( warped_inputs,
-                                                                                template_images,
-                                                                                warped_fmaps,
-                                                                                ir_fmaps,
-                                                                                loss_functions_used)
+    ### visualize and save
+    visualize_and_save(samples_to_visualize = samples_to_visualize,
+                        model = model,
+                        dataloader = test_dataloader,
+                        loss_functions_used = loss_function_used,
+                        save_path = None,
+                        dataset_name = configs.dataset,
+                        )
+    print(f"[INFO] visualizing {loss_function_used} done")
 
 
 
-    all_data_to_plot = {
-                        0:input_images,
-                        1:template_images,
-                        2:warped_inputs,
-                        4:rgb_fmaps,
-                        5:ir_fmaps,
-                        6:warped_fmaps,
-                                    }
-    
-    plot_showcase_and_save_backbone_results( all_data_to_plot,
-                                            _instances,
-                                            save_path = "resources/backbone-showcase",
-                                            dataset_name = configs.dataset,
-                                            loss_functions_used = loss_functions_used
-                                            )
-    
-
-
-
-
-# ##
 
 
 
