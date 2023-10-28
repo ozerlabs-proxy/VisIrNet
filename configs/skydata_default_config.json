@@ -19,7 +19,7 @@
     
 
     "B_initial_learning_rate"  :  0.001,
-    "B_decay_steps" : 1000,
+    "B_decay_steps" : 1000000,
     "B_decay_rate" : 0.96,
     "B_NUM_EPOCHS"  :  50,
 
@@ -31,14 +31,14 @@
 
     "R_initial_learning_rate"  :  0.001,
     "R_decay_steps"  :  1000,
-    "R_decay_rate"  :  0.96,
+    "R_decay_rate"  :  0.9,
     "R_NUM_EPOCHS"  :  50,
     "R_featureEmbeddingBackBone"  :  "latest",
     "R_from_checkpoint"  :  null,
     "R_save_path"  :  null,
     "R_save_as"  :  "regressionHead",
     "R_save_frequency"  :  1,
-    "R_save_hard_frequency" : 10,
+    "R_save_hard_frequency" : 20,
     "R_predicting_homography" : true,
     "R_LOSS_FUNCTION" : "l2_homography_loss" 
 
