@@ -55,20 +55,23 @@ def getRegressionHead(input_shape,
                     strides=(1,1), 
                     padding="same")(inputs)
     x = layers.Activation("relu")(x)
-    # x = layers.BatchNormalization(-1)(x)
-
-    x = BasicModelTools.residual_blocks(x=x,
-                        _filters_count=initial_feature_maps,
-                        blocks_count=blocks_count)
-
+    
+    x = ResnetTools.resnet_block(x, filters=16, reps =1, strides=1)
+    x = ResnetTools.resnet_block(x, filters=32, reps =2, strides=1)
+    x = ResnetTools.resnet_block(x, filters=16, reps =1, strides=1)
+    x = ResnetTools.conv_batchnorm_relu(x, filters=16, kernel_size=3, strides=1)
+    
+    x = Conv2D(filters=8, kernel_size=3, strides=1, padding='same')(x)
+    x = ReLU()(x)
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Flatten()(x)
     x = layers.Dense(1024)(x)
+    x = layers.Dense(1024)(x)
     x = layers.Dropout(.2)(x)
-    x = layers.Dense(output_size)(x)
+    output = layers.Dense(output_size)(x)
 
     model = keras.Model(inputs=inputs,
-                        outputs=x,
+                        outputs=output,
                         name="regressionBlock"
                         )
 
