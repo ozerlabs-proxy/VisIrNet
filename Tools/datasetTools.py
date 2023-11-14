@@ -183,8 +183,18 @@ def homographies_to_corners(prediction_matrices):
     new_four_points = tf.reshape(new_four_points, (-1,8))
     
     return new_four_points
-        
 
+def find_homography_np(src_points, tgt_points):
+    src_points = src_points.numpy()
+    tgt_points = tgt_points.numpy()
+    h_matrix, _ = cv2.findHomography(src_points, tgt_points, 0)
+    # matrix_size = h_matrix.size
+    if not h_matrix or h_matrix.size == 0:
+        h_matrix = np.zeros([3, 3]) * np.nan
+            
+    return tf.cast(h_matrix, tf.float32)
+
+        
 def corners_to_homographies(prediction_corners):
     """
     Given corners compute the homographies that would map the initial corners to the predicted corners
@@ -200,33 +210,48 @@ def corners_to_homographies(prediction_corners):
         homography matrices from u_v_list
     """
     # assert len(prediction_corners.shape) == 2, "prediction_corners should be [batch_size, 8]"
-    batch_size = prediction_corners.shape[0]
-    u_list = prediction_corners[:, :4]
-    v_list = prediction_corners[:, 4:]
-    
-    matrix_list = []
-    for i in range(batch_size):
-        src_points = [[0, 0], [127, 0],[0, 127], [127, 127]]
+    tf.config.run_functions_eagerly(True)
+    with tf.device("/cpu:0"):
+        # with tf.init_scope():
+        prediction_corners = tf.identity(prediction_corners)
+        prediction_corners = tf.cast(prediction_corners, tf.float32)
+        prediction_corners = tf.identity(prediction_corners)
         
-        tgt_points = np.concatenate([u_list[i:(i + 1), :], v_list[i:(i + 1), :]], axis=0)
-        tgt_points = np.transpose(tgt_points)
-        tgt_points = np.expand_dims(tgt_points, axis=1)
+        prediction_corners = tf.convert_to_tensor(prediction_corners)
+        # prediction_corners = prediction_corners.numpy()
+        batch_size = prediction_corners.shape[0]
+        u_list = prediction_corners[:, :4]
+        v_list = prediction_corners[:, 4:]
+        
 
-        src_points = np.reshape(src_points, [4, 1, 2])
-        tgt_points = np.reshape(tgt_points, [4, 1, 2])
-        # find homography
-        h_matrix, _ = cv2.findHomography(src_points.astype(np.float32), 
-                                                tgt_points.astype(np.float32), 
-                                                0)
-        matrix_size = h_matrix.size
-        if matrix_size == 0:
-            h_matrix = np.zeros([3, 3]) * np.nan
-        matrix_list.append(h_matrix)
-        
-    homography_matrices = np.asarray(matrix_list).astype(np.float32)
-    dividend = homography_matrices[...,2,2]
-    dividend = tf.expand_dims(dividend, axis=-1)
-    dividend = tf.expand_dims(dividend, axis=-1)
-    homography_matrices = tf.divide(homography_matrices,dividend)
-    # assert tf.reduce_all(tf.math.is_finite(homography_matrices)), "homography matrices have nan values"
+        matrix_list = []
+        for i in range(batch_size):
+            src_points = [[0, 0], [127, 0],[0, 127], [127, 127]]
+            
+            tgt_points = tf.concat([u_list[i:(i + 1), :], v_list[i:(i + 1), :]], axis=0)
+            tgt_points = tf.transpose(tgt_points)
+            tgt_points = tf.expand_dims(tgt_points, axis=1)
+
+            src_points = tf.reshape(src_points, [4, 1, 2])
+            tgt_points = tf.reshape(tgt_points, [4, 1, 2])
+            # find homography
+            # tf.config.run_functions_eagerly(True) 
+            # h_matrix, _ = cv2.findHomography( np.array(tf.convert_to_tensor(src_points)), 
+            #                                         np.array(tf.convert_to_tensor(tgt_points)), 
+            #                                         0)
+            # tf.config.run_functions_eagerly(False) 
+            # h_matrix, _ = cv2.findHomography(src_points.astype(np.float32), 
+            #                             tgt_points.astype(np.float32), 
+            #                             0)
+                         
+            h_matrix = tf.py_function(find_homography_np, [src_points, tgt_points], Tout=tf.float32)
+            matrix_list.append(h_matrix)
+           
+        homography_matrices = tf.cast(matrix_list, tf.float32)
+        dividend = homography_matrices[...,2,2]
+        dividend = tf.expand_dims(dividend, axis=-1)
+        dividend = tf.expand_dims(dividend, axis=-1)
+        homography_matrices = tf.divide(homography_matrices,dividend)
+        # assert tf.reduce_all(tf.math.is_finite(homography_matrices)), "homography matrices have nan values"
+    tf.config.run_functions_eagerly(False)
     return tf.cast(homography_matrices, "float")

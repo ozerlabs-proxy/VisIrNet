@@ -9,7 +9,7 @@
 #SBATCH --partition=main
 #SBATCH --gres=gpu:1
 ##SBATCH --mem=20G
-#SBATCH --time=15-0
+#SBATCH --time=30-0
 #SBATCH --output=slurm_logs/%x-%j.txt
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=alain.ndigande@ozu.edu.tr
