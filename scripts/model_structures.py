@@ -61,6 +61,9 @@ configs = ConfigurationParser.getConfigurations(configs_path = 'configs',
 
 import model_setup
 import Utils
+from datetime import date
+
+
 
 featureEmbeddingBackBone = model_setup.getFeatureEmbeddingBackBone(rgb_inputs_shape=configs.RGB_INPUTS_SHAPE,
                                                         ir_inputs_shape=configs.IR_INPUTS_SHAPE,
@@ -74,10 +77,11 @@ regressionHead= model_setup.getRegressionHead(input_shape=configs.REGRESSION_INP
                                                 )
 
 
+today = date.today()
 Utils.plot_and_save_model_structure(featureEmbeddingBackBone,
                                             save_path="resources/",
-                                            save_as=f"featureEmbeddingBackBone_30_10")
+                                            save_as=f"featureEmbeddingBackBone-{today}")
 Utils.plot_and_save_model_structure(regressionHead,
                                             save_path="resources/",
-                                            save_as=f"regressionHead_30_10")
+                                            save_as=f"regressionHead-{today}")
 

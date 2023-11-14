@@ -51,7 +51,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--config-file', 
                         action = "store", 
                         dest = "config_file",
-                        default = "skydata_default_config.json",
+                        default = "vedai_default_config.json",
                         help = 'specify config file to load')
 
 input_arguments = parser.parse_args()
@@ -141,10 +141,9 @@ len(train_dataloader), len(test_dataloader)
 
 
 ### vis loop 
-
 samples_to_visualize = 10
 # for loss_function_used in ["mse_pixel","ssim_pixel","mae_pixel","sse_pixel"]:
-for loss_function_used in ["sse_pixel"]:
+for loss_function_used in ["mse_pixel","ssim_pixel","mae_pixel","sse_pixel"]:
     print(f"[INFO] visualizing {loss_function_used} ...")
     ### setup model
     # from_checkpoint = "SkyData-sse_pixel-featureEmbeddingBackbone-1-50-c139e1fb63f240789439f2bfc7cba603-1.keras"
