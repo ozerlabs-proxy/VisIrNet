@@ -126,7 +126,7 @@ def get_losses_febackbone(warped_inputs,
         _frgb_Iir  = loss_fn(warped_fmaps,template_images)#
         _Iir_Irgb  = loss_fn(template_images,warped_inputs)
 
-        
+
     
         total_loss_mse = tf.constant(0.0)
         losses_weights = tf.constant([1,.001,1,1,.0000001,.0000001], dtype="float")
