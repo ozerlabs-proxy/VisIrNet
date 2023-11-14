@@ -154,3 +154,9 @@ for each dataset there will be regression head trained on different backbones wi
 | sse_pixel | l2_homography_loss | &check;       | -   | -           | -       | -   |
 | ssim_pixel| l2_homography_loss | &check;       | -   | -           | -       | -   |
 
+
+
+```bash 
+/cta/users/ndigande/ozerlabs-workspace/VisIrNet
+sbatch slurm-vedai-Job-test-purposes.sh
+```

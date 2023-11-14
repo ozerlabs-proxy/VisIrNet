@@ -181,23 +181,27 @@ def get_losses_regression_head(predictions,
         # corners are already predicted
         prediction_corners = predictions
         # convert corners to homographies
-        with tf.device("/cpu:0"):
-            prediction_matrices = DatasetTools.corners_to_homographies(prediction_corners)
+        # prediction_matrices = DatasetTools.corners_to_homographies(prediction_corners)
+        
+        prediction_matrices = gt_matrix
+        # print("prediction matrices ", prediction_matrices)
+        
+
     
 
-    var1_intermidiate = tf.math.abs(prediction_matrices - gt_matrix)
+    var1_intermidiate = tf.math.abs(tf.cast(prediction_matrices,"float") - tf.cast(gt_matrix,"float"))
     l1_homography_loss = tf.reduce_mean(tf.boolean_mask(var1_intermidiate, tf.math.is_finite(var1_intermidiate)))
     
     #
-    var2_intermidiate = tf.math.square(prediction_matrices - gt_matrix)
+    var2_intermidiate = tf.math.square(tf.cast(prediction_matrices,"float") - tf.cast(gt_matrix,"float"))
     l2_homography_loss = tf.reduce_mean(tf.boolean_mask(var2_intermidiate, tf.math.is_finite(var2_intermidiate)))
     
     #
-    var3_intermidiate = tf.math.abs(prediction_corners - ground_truth_corners)
+    var3_intermidiate = tf.math.abs(tf.cast(prediction_corners,"float") - tf.cast(ground_truth_corners,"float"))
     l1_corners_loss = tf.reduce_mean(tf.boolean_mask(var3_intermidiate, tf.math.is_finite(var3_intermidiate)))
     
     #
-    var4_intermidiate = tf.math.square(prediction_corners - ground_truth_corners)
+    var4_intermidiate = tf.math.square(tf.cast(prediction_corners,"float") - tf.cast(ground_truth_corners,"float"))
     l2_corners_loss = tf.reduce_mean(tf.boolean_mask(var4_intermidiate, tf.math.is_finite(var4_intermidiate)))
     
     # loss functions map

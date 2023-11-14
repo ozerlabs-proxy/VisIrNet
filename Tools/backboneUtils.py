@@ -16,7 +16,7 @@ def get_fused_fmaps(feature_maps):
     fineFmaps = tf.keras.layers.Conv2D(1, 
                                         3, 
                                         activation='linear', 
-                                        padding="same",
+                                        padding="SAME",
                                         use_bias=False,
                                         trainable=False, 
                                         kernel_initializer=initializer,
@@ -33,12 +33,12 @@ def get_fmaps_in_suitable_shape(feature_maps):
     max_pool_2d = tf.keras.layers.AveragePooling2D(pool_size=(3, 3),
                                                     trainable=False, 
                                                     strides=(1, 1), 
-                                                    padding='same')
+                                                    padding='SAME')
     y_intermediate=max_pool_2d(feature_maps)
     transformed_fmaps = tf.keras.layers.Conv2D(3, 
                                                 3, 
                                                 activation='linear', 
-                                                padding="same",
+                                                padding="SAME",
                                                 use_bias=False,
                                                 trainable=False,
                                                 kernel_initializer=initializer,

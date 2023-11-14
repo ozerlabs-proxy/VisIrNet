@@ -53,19 +53,22 @@ def getRegressionHead(input_shape,
     x = layers.Conv2D(initial_feature_maps, 
                     kernel_size=(3,3),
                     strides=(1,1), 
-                    padding="same")(inputs)
+                    padding="SAME")(inputs)
     x = layers.Activation("relu")(x)
     
-    x = ResnetTools.resnet_block(x, filters=16, reps =1, strides=1)
-    x = ResnetTools.resnet_block(x, filters=32, reps =2, strides=1)
-    x = ResnetTools.resnet_block(x, filters=16, reps =1, strides=1)
-    x = ResnetTools.conv_batchnorm_relu(x, filters=16, kernel_size=3, strides=1)
-    
-    x = Conv2D(filters=8, kernel_size=3, strides=1, padding='same')(x)
+    # x = ResnetTools.resnet_block(x, filters=64, reps =1, strides=1)
+    x = ResnetTools.resnet_block(x, filters=128, reps =1, strides=1)
+    x = tf.nn.max_pool(x, ksize=2, strides=2, padding='SAME')
+    x = ResnetTools.resnet_block(x, filters=256, reps =1, strides=1)
+    # x = ResnetTools.conv_batchnorm_relu(x, filters=128, kernel_size=3, strides=1)
+    x = tf.nn.max_pool(x, ksize=2, strides=2, padding='SAME')
+    x = Conv2D(filters=64, kernel_size=3, strides=1, padding='SAME')(x)
+    x = layers.BatchNormalization()(x)
     x = ReLU()(x)
-    x = layers.GlobalAveragePooling2D()(x)
+    
     x = layers.Flatten()(x)
     x = layers.Dense(1024)(x)
+    x = ReLU()(x)
     x = layers.Dense(1024)(x)
     x = layers.Dropout(.2)(x)
     output = layers.Dense(output_size)(x)

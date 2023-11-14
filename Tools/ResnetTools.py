@@ -12,7 +12,7 @@ from tensorflow.keras import Model
 
 
 def conv_batchnorm_relu(x, filters, kernel_size, strides=1):
-    x = Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding='same')(x)
+    x = Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding='SAME')(x)
     x = BatchNormalization()(x)
     x = ReLU()(x)
     return x
@@ -20,7 +20,7 @@ def conv_batchnorm_relu(x, filters, kernel_size, strides=1):
 def identity_block(tensor, filters):
     x = conv_batchnorm_relu(tensor, filters=filters, kernel_size=1, strides=1)
     x = conv_batchnorm_relu(x, filters=filters, kernel_size=3, strides=1)
-    x = Conv2D(filters=4*filters, kernel_size=1, strides=1, padding="same")(x)
+    x = Conv2D(filters=4*filters, kernel_size=1, strides=1, padding="SAME")(x)
     x = BatchNormalization()(x)
     x = Add()([tensor,x]) # skip connection
     x = ReLU()(x)
@@ -56,7 +56,7 @@ def FeatureEmbeddingBlock_Resnet(inputs, output_channels = 3):
     Get a feature embedding channel given an input shape and output channels
   """
   x = conv_batchnorm_relu(inputs, filters=32, kernel_size=7, strides=1)
-  x = MaxPool2D(pool_size = 3, strides =1, padding = "same")(x)
+  x = MaxPool2D(pool_size = 3, strides =1, padding = "SAME")(x)
 
   # x = resnet_block(x, filters=32, reps =1, strides=1)
   # x = resnet_block(x, filters=64, reps =2, strides=1)
@@ -67,7 +67,7 @@ def FeatureEmbeddingBlock_Resnet(inputs, output_channels = 3):
   x = resnet_block(x, filters=16, reps =1, strides=1)
 
   x = conv_batchnorm_relu(x, filters=16, kernel_size=7, strides=1)
-  x = Conv2D(filters=output_channels, kernel_size=3, strides=1, padding='same')(x)
+  x = Conv2D(filters=output_channels, kernel_size=3, strides=1, padding='SAME')(x)
 
   output = ReLU()(x)
 
