@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#SBATCH --job-name=sky__mae_sse__ssim_mse
+#SBATCH --job-name=sky_2_l2_homography_loss
 #SBATCH --account=users
 #SBATCH --nodes=1
-#SBATCH --nodelist=nova[83]
+#SBATCH --nodelist=nova[82]
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=16
 #SBATCH --partition=main
@@ -48,10 +48,10 @@ echo "--**Training**--"
 ##### second stage
 ## "l1_homography_loss" ,"l2_homography_loss" , "l1_corners_loss" , "l2_corners_loss" 
 
-# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --r_loss_function l2_corners_loss --b_loss_function ssim_pixel --train_second_stage True 
-# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --r_loss_function l2_corners_loss --b_loss_function mse_pixel  --train_second_stage True
-srun nvidia-smi && python Train.py --config-file skydata_default_config.json --r_loss_function l2_corners_loss --b_loss_function mae_pixel  --train_second_stage True
-srun nvidia-smi && python Train.py --config-file skydata_default_config.json --r_loss_function l2_corners_loss --b_loss_function sse_pixel  --train_second_stage True
+# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --r_loss_function l2_homography_loss --b_loss_function ssim_pixel --train_second_stage True 
+# srun nvidia-smi && python Train.py --config-file skydata_default_config.json --r_loss_function l2_homography_loss --b_loss_function mse_pixel  --train_second_stage True
+srun nvidia-smi && python Train.py --config-file skydata_default_config.json --r_loss_function l2_homography_loss --b_loss_function mae_pixel  --train_second_stage True
+srun nvidia-smi && python Train.py --config-file skydata_default_config.json --r_loss_function l2_homography_loss --b_loss_function sse_pixel  --train_second_stage True
 
 ## <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<DATASETS iNTEGRITY>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>#
 ## srun python scripts/check_dataset_integrity.py 
