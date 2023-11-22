@@ -273,3 +273,89 @@ def train_second_stage(model: tf.keras.Model,
         print(f"[TEST] : {test_log}")
                                 
     return model, log_tag["per_epoch_metrics"] 
+
+
+""" run predictions"""
+
+def run_predictions(featureEmbeddingBackBone,
+                        test_dataloader,
+                        dataset_name,
+                        from_checkpoint=None,
+                        save_path=None,
+                        predicting_homography=False,
+                        backbone_loss_function="mse_pixel",
+                        loss_function_to_use="l2_homography_loss"):
+    
+    assert save_path is not None, "save_path is None"
+    save_path_backbone = save_path+ f"/{backbone_loss_function}"
+    save_path = save_path+ f"/{loss_function_to_use}"
+    homography_based = "homography" if predicting_homography else "corners"
+
+    # create a tag for the training
+    log_tag = {
+                    "test_size": len(test_dataloader),
+                    "featureEmbeddingBackBone": None,
+                    "predicting_homography": predicting_homography,
+                    "tag_name": f"{dataset_name}-{backbone_loss_function}-{loss_function_to_use}-{homography_based}",
+                    "backbone_test_results":defaultdict(list),
+                    "test_results":defaultdict(list),
+                    "training_time": 0     
+                }
+    
+    
+
+    
+    # load the feature embedding backbone
+    backBone = None
+    if featureEmbeddingBackBone is not None:
+        print(f"[INFO] Loading {featureEmbeddingBackBone}")
+        pattern = f"*{backbone_loss_function}-featureEmbeddingBackbone*" \
+                                                if str(featureEmbeddingBackBone)=="latest" \
+                                                    else f"*{featureEmbeddingBackBone}*"
+        model_name = common_utils.latest_file(Path(save_path_backbone), pattern=pattern)
+        log_tag["featureEmbeddingBackbone"] = str(model_name)
+        backBone = common_utils.load_model(model_name)
+        print(f"[INFO] Loaded {featureEmbeddingBackBone}")
+    
+        # load regression block
+    model = None
+    if from_checkpoint is not None:
+        print(f"[INFO] Loading {from_checkpoint}")
+        pattern = f"*-{backbone_loss_function}-{loss_function_to_use}*" \
+                                                    if str(from_checkpoint)=="latest" \
+                                                            else f"*{from_checkpoint}*"
+        model_name = common_utils.latest_file(Path(save_path), pattern=pattern)
+        log_tag["resumed_from"] = str(model_name)
+        model = common_utils.load_model(model_name)
+        print(f"[INFO] Loaded {from_checkpoint}")
+        
+    assert backBone is not None, "backBone is None"
+    assert model is not None, "model is None"
+        
+    # 2. Create empty results dictionary
+    print(f"[INFO] Running Predictions")
+    agregated_metrics ,test_log, losses_summary= regression_head_engine.predict(model=model,
+                                                                        backBone=backBone,
+                                                                        dataloader=test_dataloader,
+                                                                        predicting_homography = predicting_homography,
+                                                                        backbone_loss_function = backbone_loss_function,
+                                                                        loss_function_to_use = loss_function_to_use
+                                                                        )
+            
+    for step, results in agregated_metrics.items():
+        step = "" if str(step) != "backbone" else "backbone_"
+        for key, value in results.items():
+            log_tag[f"{step}test_results"][key].append(value)
+
+    # 7. Save Prediction results
+    common_utils.save_logs(logs=log_tag,
+                            save_path=f"predictions/{dataset_name}",
+                            save_as=f"{log_tag['tag_name']}.json")
+    
+    common_utils.save_predictions(predictions=losses_summary,
+                        save_path=f"predictions/{dataset_name}",
+                        save_as=f"{log_tag['tag_name']}.csv")
+
+    print(f"[RES] : {test_log}")
+                                
+    return model, log_tag["per_epoch_metrics"] 

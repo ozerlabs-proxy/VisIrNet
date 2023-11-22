@@ -232,5 +232,82 @@ def get_losses_regression_head(predictions,
         
     return total_loss, detailed_batch_losses
     
+    
+       
+@tf.function    
+def get_inference_losses(predictions, 
+                                ground_truth_corners,
+                                gt_matrix , 
+                                predicting_homography,
+                                loss_function_to_use):
+    losses = tf.constant(0.0)
+    if predicting_homography:
+        # append ones to to the predictions 
+        ones = tf.cast(tf.ones((predictions.shape[0],1)),dtype="float")
+        predictions = tf.concat([tf.cast(predictions,dtype="float"), ones], axis=-1)
+        # reshape predictions to be [batch_size, 3,3]
+        prediction_matrices = tf.reshape(predictions, (-1,3,3))
+        # get predicted corners from predicted homographies
+        prediction_corners = DatasetTools.homographies_to_corners(prediction_matrices)
+    else:
+        # corners are already predicted
+        prediction_corners = predictions
+        # convert corners to homographies
+        # prediction_matrices = DatasetTools.corners_to_homographies(prediction_corners)
+        
+        prediction_matrices = gt_matrix
+        # print("prediction matrices ", prediction_matrices)
+        
+
+    
+
+    var1_intermidiate = tf.math.abs(tf.cast(prediction_matrices,"float") - tf.cast(gt_matrix,"float"))
+    l1_homography_loss = tf.reduce_mean(tf.boolean_mask(var1_intermidiate, tf.math.is_finite(var1_intermidiate)))
+    
+    #
+    var2_intermidiate = tf.math.square(tf.cast(prediction_matrices,"float") - tf.cast(gt_matrix,"float"))
+    l2_homography_loss = tf.reduce_mean(tf.boolean_mask(var2_intermidiate, tf.math.is_finite(var2_intermidiate)))
+    
+    #
+    var3_intermidiate = tf.math.abs(tf.cast(prediction_corners,"float") - tf.cast(ground_truth_corners,"float"))
+    l1_corners_loss = tf.reduce_mean(tf.boolean_mask(var3_intermidiate, tf.math.is_finite(var3_intermidiate)))
+    
+    #
+    var4_intermidiate = tf.math.square(tf.cast(prediction_corners,"float") - tf.cast(ground_truth_corners,"float"))
+    l2_corners_loss = tf.reduce_mean(tf.boolean_mask(var4_intermidiate, tf.math.is_finite(var4_intermidiate)))
+    
+
+    var5_intermidiate = tf.math.sqrt(tf.math.square(tf.cast(prediction_corners,"float") - tf.cast(ground_truth_corners,"float")))
+    ace = tf.reduce_mean(tf.boolean_mask(var5_intermidiate, tf.math.is_finite(var5_intermidiate)))
+    
+    
+    # loss functions map
+    loss_functions_to_weights = {   
+                                    "l1_homography_loss": tf.constant([1.0, .0, .0, .0], dtype="float"),
+                                    "l2_homography_loss": tf.constant([.0, 1.0, .0, .0], dtype="float"),
+                                    "l1_corners_loss": tf.constant([.0, .0, 1.0, .0], dtype="float"),
+                                    "l2_corners_loss": tf.constant([.0, .0, .0, 1.0], dtype="float")                              
+                                    }
+    
+    losses_weights = loss_functions_to_weights[loss_function_to_use]
+
+    losses = tf.convert_to_tensor([l1_homography_loss, l2_homography_loss, l1_corners_loss, l2_corners_loss], dtype="float")
+    # losses = [l1_homography_loss, l2_homography_loss, l1_corners_loss, l2_corners_loss]
+    losses = tf.math.multiply(losses ,losses_weights)
+    total_loss = tf.reduce_sum(tf.boolean_mask(losses, tf.math.is_finite(losses)))
+    total_loss = tf.convert_to_tensor(tf.keras.backend.epsilon(),dtype="float") + tf.cast((total_loss if tf.math.is_finite(total_loss) else 0.0),dtype="float")
+
+    # create losss dictionary
+    detailed_batch_losses = {"l1_homography_loss": l1_homography_loss,
+                            "l2_homography_loss": l2_homography_loss,
+                            "l1_corners_loss": l1_corners_loss,
+                            "l2_corners_loss": l2_corners_loss,
+                            "Ace": ace,
+                            "total_loss": total_loss
+                            }
+    # total loss must be a tensor
+    # assert total_loss is not None, f"{losses}[ERROR] total_loss is None"
+        
+    return total_loss, detailed_batch_losses
 
     

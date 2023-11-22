@@ -5,6 +5,8 @@ from pathlib import Path
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 
+import pandas as pd
+
 def tensor_has_nan(some_tensor):
         """
         check if the tensor has nans
@@ -77,6 +79,27 @@ def save_logs(logs,save_path,save_as):
                         json.dump(logs, fp,default=np_encoder)
         except Exception as e:
                 print(f"[ERROR] model couldn't be saved at {save_path}")
+         
+def save_predictions(predictions,save_path,save_as):
+        """
+                make dataframe and save predictions to csv file
+        """
+        
+        
+        save_path = Path(save_path)
+        
+        predictions = pd.DataFrame(predictions)
+        try:
+                print(f"[INFO] Saving predictions at {save_path}")
+                save_path.mkdir(parents=True, exist_ok=True)
+                save_path = save_path / f"{save_as}"
+                assert save_path.suffix == '.csv', "file name must have .csv extension"
+                save_path = str(save_path)
+
+                predictions.to_csv(save_path)
+
+        except Exception as e:
+                print(f"[ERROR] couldn't save {save_path}")
         
 
 # get latest file from a directory

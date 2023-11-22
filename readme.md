@@ -83,6 +83,17 @@ conda activate VisIrNet
 tensorboard --logdir logs/tensorboard
 ```
 
+
+## run inference
+
+```bash
+
+# make sure conda env is activated
+conda activate VisIrNet
+python Test.py --config-file skydata_default_config.json --r_loss_function  l2_corners_loss --b_loss_function ssim_pixel
+
+```
+
 ## Notebooks
 
 - [Train Test Flow](notebooks/pipeline.ipynb)

@@ -53,3 +53,30 @@ def create_dataloaders(
     print(f"test_dataloader: {len(test_dataloader)}")
 
     return train_dataloader, test_dataloader
+
+
+def create_dataloader_test(
+                        dataset: str="SkyData", 
+                        BATCH_SIZE = 1,
+                        ):
+    """
+    _summary_
+        Generate and return a dataloader for the test dataset given dataset name and batch size
+
+    Returns:
+        train_dataloader, test_dataloader
+    """
+    
+
+    assert dataset in ["SkyData", "VEDAI","GoogleEarth","GoogleMap","MSCOCO"] , "dataset not supported"
+    assert BATCH_SIZE is not None, "BATCH_SIZE is not defined"
+    
+    test_dataset = Dataset(dataset = dataset, split="val").dataset
+    
+    test_dataloader = test_dataset.batch(BATCH_SIZE, drop_remainder=False)
+    
+    print(f"dataset: {dataset}")
+    print(f"BATCH_SIZE: {BATCH_SIZE}")
+    print(f"test_dataloader: {len(test_dataloader)}")
+
+    return test_dataloader

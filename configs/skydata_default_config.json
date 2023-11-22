@@ -34,13 +34,13 @@
     "R_decay_rate"  :  0.96,
     "R_NUM_EPOCHS"  :  30,
     "R_featureEmbeddingBackBone"  :  "latest",
-    "R_from_checkpoint"  :  null,
+    "R_from_checkpoint"  :  "null",
     "R_save_path"  :  null,
     "R_save_as"  :  "regressionHead",
     "R_save_frequency"  :  1,
     "R_save_hard_frequency" : 14,
-    "R_predicting_homography" : true,
-    "R_LOSS_FUNCTION" : "l2_homography_loss" 
+    "R_predicting_homography" : false,
+    "R_LOSS_FUNCTION" : "l2_corners_loss" 
 
 
 }
