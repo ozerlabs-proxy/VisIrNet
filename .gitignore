@@ -1,0 +1,24 @@
+data
+logs
+tensorboard
+logs/tensorboard/*
+tensorboard/*
+logs/tensorboard
+models
+slurm_logs
+backups
+./backups
+
+# ignore cython files
+global-exclude *.pyx
+global-exclude *.pyd
+global-exclude *.so
+global-exclude *.dll
+global-exclude *.pyc
+global-exclude *.pyo
+
+# ignore build files
+__pycache__
+
+# specific files
+
